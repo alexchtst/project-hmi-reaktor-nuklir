@@ -34,7 +34,7 @@ def setup_load_showeddata(data_dictionary, output_dir="../data"):
     label_gen = []
     active_power = []
     reactive_power = []
-    
+
     import json
     import os
     from datetime import datetime
@@ -71,16 +71,24 @@ def setup_load_showeddata(data_dictionary, output_dir="../data"):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(result_data, f, indent=4, ensure_ascii=False)
 
-
     return filepath
 
+
+def safe_getattr(obj, attr, default=0):
+    try:
+        val = obj.GetAttribute(attr)
+        if val is None:
+            return default
+        return val
+    except:
+        return default
 
 
 def running_loadflow(
     digsilent_path,
     proj_name,
     case_name,
-    output_dir = "../data"
+    output_dir="../data"
 ):
     import sys
     import os
@@ -93,7 +101,7 @@ def running_loadflow(
         import powerfactory as pf
 
         app = pf.GetApplication()
-        
+
         if app is None:
             raise TypeError(f"Error: app is not initialized")
         app.ClearOutputWindow()
@@ -106,7 +114,7 @@ def running_loadflow(
         all_study_cases = study_case_folder.GetContents()
         # print
         for obj in all_study_cases:
-            
+
             pass
 
         study_case = None
@@ -120,19 +128,15 @@ def running_loadflow(
                 f"Study case '{case_name}' not found in project '{proj_name}'")
 
         study_case.Activate()
-        
 
         ldf = app.GetFromStudyCase("ComLdf")
         if ldf is None:
             raise TypeError(
                 "Load flow command (ComLdf) not found in study case")
 
-        
         ierr = ldf.Execute()
         if ierr != 0:
             raise RuntimeError(f"Load flow failed with error code {ierr}")
-
-        
 
         insert_to = {
             "project": proj_name,
@@ -144,7 +148,6 @@ def running_loadflow(
             "transformers": [],
         }
 
-        
         buses = app.GetCalcRelevantObjects("*.ElmTerm")
         for bus in buses:
             insert_to["buses"].append({
@@ -154,21 +157,19 @@ def running_loadflow(
                 "angle_deg": bus.GetAttribute("m:phiu"),
             })
 
-        
         gens = app.GetCalcRelevantObjects("*.ElmSym")
         for gen in gens:
             insert_to["generators"].append({
                 "name": gen.loc_name,
-                "P": gen.GetAttribute("m:P:bus1"),
-                "Q": gen.GetAttribute("m:Q:bus1"),
-                "I": gen.GetAttribute("m:I:bus1"),
-                "COSPHI": gen.GetAttribute("m:cosphi:bus1"),
-                "S": gen.GetAttribute("m:S:bus1"),
-                "I1": gen.GetAttribute("m:i1:bus1"),
-                "PHII1": gen.GetAttribute("m:phii1:bus1"),
+                "P": safe_getattr(gen, "m:P:bus1"),
+                "Q": safe_getattr(gen, "m:Q:bus1"),
+                "I": safe_getattr(gen, "m:I:bus1"),
+                "COSPHI": safe_getattr(gen, "m:cosphi:bus1"),
+                "S": safe_getattr(gen, "m:S:bus1"),
+                "I1": safe_getattr(gen, "m:i1:bus1"),
+                "PHII1": safe_getattr(gen, "m:phii1:bus1"),
             })
 
-        
         lines = app.GetCalcRelevantObjects("*.ElmLne")
         for line in lines:
             insert_to["lines"].append({
@@ -182,7 +183,6 @@ def running_loadflow(
                 "I_to_kA": line.GetAttribute("m:I:bus2"),
             })
 
-        
         loads = app.GetCalcRelevantObjects("*.ElmLod")
         for load in loads:
             insert_to["loads"].append({
@@ -192,7 +192,6 @@ def running_loadflow(
                 "I_kA": load.GetAttribute("m:I:bus1"),
             })
 
-        
         trafos = app.GetCalcRelevantObjects("*.ElmTr2")
         for trafo in trafos:
             insert_to["transformers"].append({
@@ -235,7 +234,7 @@ def run_dynamic_simulation(
         "ElmLne": [],
         "ElmTr2": [],
     },
-    output_dir = "../data"
+    output_dir="../data"
 ):
     import sys
     import os
@@ -288,8 +287,6 @@ def run_dynamic_simulation(
 
         comSim.tstop = stop_time_simulation   # Stop time
 
-        
-
         comInc.Execute()
         elmRes = comInc.p_resvar
 
@@ -301,11 +298,9 @@ def run_dynamic_simulation(
             cont = faultFolder.GetContents()
             for obj in cont:
                 obj.Delete()
-            
 
         fault_configured = False
         if start_fault is not None and fault_element_name is not None:
-            
 
             fault_element = None
             elements = app.GetCalcRelevantObjects(fault_element_type)
@@ -351,7 +346,6 @@ def run_dynamic_simulation(
                     except Exception as e:
                         pass
 
-
         app.EchoOff()
         comInc.Execute()
         app.EchoOn()
@@ -361,12 +355,10 @@ def run_dynamic_simulation(
         if result != 0:
             raise RuntimeError(f"Simulation failed with error code: {result}")
 
-
         elmRes.Load()
 
         nCols = elmRes.GetNumberOfColumns()
         nRows = elmRes.GetNumberOfRows()
-
 
         from datetime import datetime
         if not os.path.exists(output_dir):
@@ -399,7 +391,6 @@ def run_dynamic_simulation(
                 writer.writerow(dataRow)
 
         elmRes.Release()
-
 
         return True, "Success to run dynamic simulation", datapath_result
 

@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QCheckBox,
+    QApplication, QMainWindow, QWidget, QCheckBox, QTableWidget,
     QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QListWidget, QLineEdit, QTextEdit, QComboBox,
     QTableWidget, QTableWidgetItem, QSpinBox, QMessageBox
@@ -843,6 +843,11 @@ class MainWindow(QMainWindow):
             )
 
             stdout, stderr = process.communicate()
+            
+            print("=== STDOUT ===")
+            print(stdout)
+            print("=== STDERR ===")
+            print(stderr)
 
             if process.returncode != 0 or stderr:
                 self.log_text.append(f"[ERROR] {stderr.strip()}")
