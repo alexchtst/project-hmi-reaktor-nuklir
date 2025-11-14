@@ -138,11 +138,13 @@ class DetailDynamicWindow(QMainWindow):
     data_frame_ready_signal = pyqtSignal()
     on_selected_ready_signal = pyqtSignal(list)
     
-    def __init__(self):
+    def __init__(self, fp):
         super().__init__()
         self.setWindowTitle("Dynamic Simulation Detail")
         self.setGeometry(150, 100, 1200, 600)
         self.setMinimumSize(1200, 600)
+        
+        self.result_fp = fp
 
         self.data_frame = None
         self.plot_windows = []
@@ -186,7 +188,7 @@ class DetailDynamicWindow(QMainWindow):
 
     def setup_worker(self):
         self.thread = QThread()
-        self.worker = Worker(file_path="./data/dynamic_result_with_fault_20251113_135542.csv")
+        self.worker = Worker(file_path=self.result_fp)
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
@@ -291,7 +293,7 @@ class DetailDynamicWindow(QMainWindow):
         selector_layout = QVBoxLayout()
         selector_panel.setLayout(selector_layout)
 
-        select_label = QLabel("Select columns to plot (Ctrl/Cmd + Click for multiple):")
+        select_label = QLabel("Select columns to plot (Shift + Click for multiple):")
         selector_layout.addWidget(select_label)
         
         self.column_list = QListWidget()
