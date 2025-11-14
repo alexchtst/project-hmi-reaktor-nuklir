@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QCheckBox, QTableWidget,
     QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QListWidget, QLineEdit, QTextEdit, QComboBox,
-    QTableWidget, QTableWidgetItem, QSpinBox, QMessageBox
+    QTableWidget, QTableWidgetItem, QSpinBox, QMessageBox, QDoubleSpinBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread
 import sys
@@ -405,14 +405,14 @@ class MainWindow(QMainWindow):
 
         # Fault time
         self.config_layout.addWidget(QLabel("Fault time [start, end]"))
-        self.start_fault_spin = QSpinBox()
-        self.start_fault_spin.setRange(0, 10000)
-        self.start_fault_spin.setValue(0)
+        self.start_fault_spin = QDoubleSpinBox()
+        self.start_fault_spin.setRange(0, 100.0)
+        self.start_fault_spin.setValue(2.0)
         self.start_fault_spin.valueChanged.connect(self.update_summary)
 
-        self.stop_fault_spin = QSpinBox()
-        self.stop_fault_spin.setRange(0, 10000)
-        self.stop_fault_spin.setValue(1)
+        self.stop_fault_spin = QDoubleSpinBox()
+        self.stop_fault_spin.setRange(0, 100.0)
+        self.stop_fault_spin.setValue(2.1)
         self.stop_fault_spin.valueChanged.connect(self.update_summary)
 
         self.config_layout.addWidget(QLabel("Start Fault (s):"))
@@ -589,7 +589,7 @@ class MainWindow(QMainWindow):
                 start_fault = self.start_fault_spin.value()
                 stop_fault = self.stop_fault_spin.value()
                 fault_dur = stop_fault - start_fault
-                summary += f" | Fault: {start_fault}-{stop_fault}s ({fault_dur}s)"
+                summary += f" | Fault: {start_fault}-{stop_fault}s ({round(fault_dur, 3)}s)"
 
             self.summary_label.setText(summary)
 

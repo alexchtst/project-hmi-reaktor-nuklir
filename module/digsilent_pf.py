@@ -227,7 +227,7 @@ def run_dynamic_simulation(
     fault_element_name=None,
     fault_element_type="ElmLne",
     fault_type=0,  # 0=3-phase short circuit
-    step_size=0.01,
+    step_size=1,
     properties_data_name={
         "ElmSym": ["m:P:bus1", "m:Q:bus1", "n:fehz:bus1"],
         "ElmTerm": ["m:fehz"],
@@ -367,7 +367,7 @@ def run_dynamic_simulation(
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         sim_type = "with_fault" if fault_configured else "no_fault"
         datapath_result = os.path.join(
-            output_dir, f"dynamic_result_{sim_type}_{timestamp}.csv")
+            output_dir, f"drs_{start_fault}_{clear_fault}_{sim_type}_{timestamp}.csv")
 
         with open(datapath_result, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
