@@ -44,7 +44,7 @@ QTextEdit {
     background-color: #E0E0E0;
 }
 #BlueProgressBar::chunk {
-    background-color: #2196F3;
+    background-color: #005a9e;
     width: 10px; 
     margin: 0.5px;
 }

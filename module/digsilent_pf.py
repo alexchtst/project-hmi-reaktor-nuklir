@@ -18,7 +18,7 @@ def connectandsetup(digsilent_path, proj_name):
 
         if project == None:
             raise TypeError(f"Error: project is none")
-        
+
         print(f"[INFO]: Get all study cases")
         study_case_folder = app.GetProjectFolder("study")
         all_study_cases = study_case_folder.GetContents()
@@ -122,7 +122,7 @@ def running_loadflow(
             if obj.loc_name.strip() == case_name.strip():
                 study_case = obj
                 break
-        
+
         if study_case is None:
             raise ValueError(
                 f"Study case '{case_name}' not found in project '{proj_name}'")
@@ -149,7 +149,7 @@ def running_loadflow(
             "loads": [],
             "transformers": [],
         }
-        
+
         print(f"[INFO]: Getting data buss....")
         buses = app.GetCalcRelevantObjects("*.ElmTerm")
         for bus in buses:
@@ -221,7 +221,6 @@ def running_loadflow(
 # "ElmTerm": ["m:u", "m:phiu", "m:fehz"],
 # "ElmLne": ["m:P:bus1", "m:P:bus2", "m:Q:bus1", "m:Q:bus2", "m:I:bus1"],
 # "ElmTr2": ["m:P:bushv", "m:P:buslv", "c:loading"],
-
 
 def run_dynamic_simulation(
     digsilent_path,
@@ -379,6 +378,7 @@ def run_dynamic_simulation(
         with open(datapath_result, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
 
+            # Header
             header = ["Time_s"]
             for col in range(nCols):
                 varName = elmRes.GetVariable(col)
@@ -387,19 +387,25 @@ def run_dynamic_simulation(
                     f"{objName.loc_name}_{varName.replace(':', '_')}")
             writer.writerow(header)
 
+            # Filter data berdasarkan start_time dan stop_time
+            rows_written = 0
             for row in range(nRows):
                 time_val = elmRes.GetValue(row, -1)[1]
-                dataRow = [time_val]
 
-                for col in range(nCols):
-                    value = elmRes.GetValue(row, col)[1]
-                    dataRow.append(value)
+                # FILTER: Hanya ambil data dalam range waktu yang ditentukan
+                if start_time_simulation <= time_val <= stop_time_simulation:
+                    dataRow = [time_val]
 
-                writer.writerow(dataRow)
+                    for col in range(nCols):
+                        value = elmRes.GetValue(row, col)[1]
+                        dataRow.append(value)
+
+                    writer.writerow(dataRow)
+                    rows_written += 1
 
         elmRes.Release()
 
-        return True, "Success to run dynamic simulation", datapath_result
+        return True, f"Success to run dynamic simulation. Rows written: {rows_written}", datapath_result
 
     except Exception as e:
         import traceback
