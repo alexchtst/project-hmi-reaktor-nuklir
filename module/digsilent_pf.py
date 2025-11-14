@@ -9,14 +9,17 @@ def connectandsetup(digsilent_path, proj_name):
         sys.path.append(f"{os.path.abspath(digsilent_path)}")
         import powerfactory as pf
 
+        print("[INFO]: Activating the power factory application")
         app = pf.GetApplication()
         app.ClearOutputWindow()
 
+        print(f"[INFO]: Actifting the project: {proj_name}")
         project = app.ActivateProject(proj_name)
 
         if project == None:
             raise TypeError(f"Error: project is none")
-
+        
+        print(f"[INFO]: Get all study cases")
         study_case_folder = app.GetProjectFolder("study")
         all_study_cases = study_case_folder.GetContents()
 
@@ -92,6 +95,7 @@ def running_loadflow(
 ):
     import sys
     import os
+    import time
 
     try:
         if not os.path.exists(digsilent_path):
@@ -106,29 +110,27 @@ def running_loadflow(
             raise TypeError(f"Error: app is not initialized")
         app.ClearOutputWindow()
 
+        print(f"[INFO]: Actifating project {proj_name}....")
         project = app.ActivateProject(proj_name)
         if project is None:
             raise TypeError(f"Error: Project '{proj_name}' not found")
 
         study_case_folder = app.GetProjectFolder("study")
         all_study_cases = study_case_folder.GetContents()
-        # print
-        for obj in all_study_cases:
-
-            pass
-
         study_case = None
         for obj in all_study_cases:
             if obj.loc_name.strip() == case_name.strip():
                 study_case = obj
                 break
-
+        
         if study_case is None:
             raise ValueError(
                 f"Study case '{case_name}' not found in project '{proj_name}'")
 
+        print(f"[INFO]: Actifating study case {study_case}....")
         study_case.Activate()
 
+        print(f"[INFO]: Start Running loadflow....")
         ldf = app.GetFromStudyCase("ComLdf")
         if ldf is None:
             raise TypeError(
@@ -147,7 +149,8 @@ def running_loadflow(
             "loads": [],
             "transformers": [],
         }
-
+        
+        print(f"[INFO]: Getting data buss....")
         buses = app.GetCalcRelevantObjects("*.ElmTerm")
         for bus in buses:
             insert_to["buses"].append({
@@ -157,6 +160,7 @@ def running_loadflow(
                 "angle_deg": bus.GetAttribute("m:phiu"),
             })
 
+        print(f"[INFO]: Getting data generators....")
         gens = app.GetCalcRelevantObjects("*.ElmSym")
         for gen in gens:
             insert_to["generators"].append({
@@ -170,6 +174,7 @@ def running_loadflow(
                 "PHII1": safe_getattr(gen, "m:phii1:bus1"),
             })
 
+        print(f"[INFO]: Getting data lines....")
         lines = app.GetCalcRelevantObjects("*.ElmLne")
         for line in lines:
             insert_to["lines"].append({
@@ -183,6 +188,7 @@ def running_loadflow(
                 "I_to_kA": line.GetAttribute("m:I:bus2"),
             })
 
+        print(f"[INFO]: Getting data load....")
         loads = app.GetCalcRelevantObjects("*.ElmLod")
         for load in loads:
             insert_to["loads"].append({
@@ -192,6 +198,7 @@ def running_loadflow(
                 "I_kA": load.GetAttribute("m:I:bus1"),
             })
 
+        print(f"[INFO]: Getting data trafos....")
         trafos = app.GetCalcRelevantObjects("*.ElmTr2")
         for trafo in trafos:
             insert_to["transformers"].append({
