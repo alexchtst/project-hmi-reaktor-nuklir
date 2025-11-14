@@ -282,7 +282,7 @@ def run_dynamic_simulation(
         comInc.iopt_sim = "rms"      # RMS simulation
         comInc.iopt_show = 0         # No graphical output during simulation
         comInc.iopt_adapt = 0        # Fixed step size
-        comInc.dtgrd = step_size     # Step size
+        comInc.dtgrd = 1     # Step size
         comInc.start = start_time_simulation  # Start time
 
         comSim.tstop = stop_time_simulation   # Stop time
@@ -372,6 +372,7 @@ def run_dynamic_simulation(
         with open(datapath_result, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
 
+            # Header
             header = ["Time_s"]
             for col in range(nCols):
                 varName = elmRes.GetVariable(col)
@@ -380,19 +381,25 @@ def run_dynamic_simulation(
                     f"{objName.loc_name}_{varName.replace(':', '_')}")
             writer.writerow(header)
 
+            # Filter data berdasarkan start_time dan stop_time
+            rows_written = 0
             for row in range(nRows):
                 time_val = elmRes.GetValue(row, -1)[1]
-                dataRow = [time_val]
 
-                for col in range(nCols):
-                    value = elmRes.GetValue(row, col)[1]
-                    dataRow.append(value)
+                # FILTER: Hanya ambil data dalam range waktu yang ditentukan
+                if start_time_simulation <= time_val <= stop_time_simulation:
+                    dataRow = [time_val]
 
-                writer.writerow(dataRow)
+                    for col in range(nCols):
+                        value = elmRes.GetValue(row, col)[1]
+                        dataRow.append(value)
+
+                    writer.writerow(dataRow)
+                    rows_written += 1
 
         elmRes.Release()
 
-        return True, "Success to run dynamic simulation", datapath_result
+        return True, f"Success to run dynamic simulation. Rows written: {rows_written}", datapath_result
 
     except Exception as e:
         import traceback
