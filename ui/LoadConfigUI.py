@@ -3,15 +3,12 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QListWidget,
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread
-import sys
 import os
-import pandas as pd
 from module.config_manager import *
 
 class LoadConfigWindow(QMainWindow):
 
-    def __init__(self, parent=None):
+    def __init__(self, base_path = os.getcwd(), parent=None):
         super().__init__(parent)
 
         self.setWindowTitle("Load Existing Configuration")
@@ -19,7 +16,7 @@ class LoadConfigWindow(QMainWindow):
         self.setMinimumSize(400, 300)
 
         self.config = loadSanitizeSavedConfig(
-            os.path.join(os.getcwd(), "config"))
+            os.path.join(base_path, "config"))
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)

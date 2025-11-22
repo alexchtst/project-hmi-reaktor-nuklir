@@ -9,10 +9,10 @@ from matplotlib.figure import Figure
 import pandas as pd
 
 class DetailLoadflowWindow(QMainWindow):
-    def __init__(self, history_name, data, parent=None):
+    def __init__(self, data, parent=None):
         super().__init__(parent)
 
-        self.setWindowTitle(f"Detail - {history_name}")
+        self.setWindowTitle(f"Load Flow Result")
         self.setGeometry(150, 100, 1000, 600)
         self.setMinimumSize(1000, 600)
 

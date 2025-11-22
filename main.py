@@ -1,344 +1,24 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QCheckBox, QTableWidget,
+    QApplication, QMainWindow, QWidget, QCheckBox,
     QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QListWidget, QLineEdit, QTextEdit, QComboBox,
-    QTableWidget, QTableWidgetItem, QSpinBox, QMessageBox, QDoubleSpinBox
+    QMessageBox, QDoubleSpinBox
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread
 import sys
 import os
-import pandas as pd
 
 from module.qt_custom_style import *
 from module.config_manager import *
 from module.digsilent_pf import *
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-
-
-class DetailLoadflowWindow(QMainWindow):
-    def __init__(self, history_name, data, parent=None):
-        super().__init__(parent)
-
-        self.setWindowTitle(f"Detail - {history_name}")
-        self.setGeometry(150, 100, 1000, 600)
-        self.setMinimumSize(1000, 600)
-
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-
-        main_layout = QHBoxLayout()
-        central_widget.setLayout(main_layout)
-
-        left_panel = QGroupBox("Visualization")
-        left_layout = QVBoxLayout()
-        left_panel.setLayout(left_layout)
-
-        fig = Figure(figsize=(12, 8))
-        self.canvas = FigureCanvas(fig)
-        left_layout.addWidget(self.canvas)
-        self.ax1 = fig.add_subplot(2, 2, 1)
-        self.ax2 = fig.add_subplot(2, 2, 2)
-        self.ax3 = fig.add_subplot(2, 2, 3)
-        self.ax4 = fig.add_subplot(2, 2, 4)
-        fig.tight_layout(pad=8)
-
-        self.plot_data(data)
-
-        main_layout.addWidget(left_panel)
-
-    def plot_data(self, data):
-        bar_color = "#005a9e"
-        rotation_angle = 90
-
-        self.ax1.clear()
-        self.ax1.bar(data["busslabel"], data["busvoltage"], color=bar_color)
-        self.ax1.set_title("Bus Voltage (kA.)", fontsize=10)
-        self.ax1.set_xlabel("Bus Name")
-        self.ax1.set_ylabel("Voltage (p.u.)")
-        self.ax1.tick_params(axis='x', rotation=rotation_angle)
-
-        self.ax2.clear()
-        self.ax2.bar(data["busslabel"],
-                     data["busphasevoltage"], color=bar_color)
-        self.ax2.set_title("Bus Phase Voltage (°)", fontsize=10)
-        self.ax2.set_xlabel("Bus Name")
-        self.ax2.set_ylabel("Angle (°)")
-        self.ax2.tick_params(axis='x', rotation=rotation_angle)
-
-        self.ax3.clear()
-        self.ax3.bar(data["generatorlabel"],
-                     data["generatoractivepower"], color=bar_color)
-        self.ax3.set_title("Generator Active Power (MW)", fontsize=10)
-        self.ax3.set_xlabel("Generator Name")
-        self.ax3.set_ylabel("P (MW)")
-        self.ax3.tick_params(axis='x', rotation=rotation_angle)
-
-        self.ax4.clear()
-        self.ax4.bar(data["generatorlabel"],
-                     data["generatorreactivepower"], color=bar_color)
-        self.ax4.set_title("Generator Reactive Power (MVAr)", fontsize=10)
-        self.ax4.set_xlabel("Generator Name")
-        self.ax4.set_ylabel("Q (MVAr)")
-        self.ax4.tick_params(axis='x', rotation=rotation_angle)
-
-        self.canvas.draw()
-
-
-class DetailDynamicWindow(QMainWindow):
-    def __init__(self, history_name="Loadflow", csv_path=None, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle(f"Detail - {history_name}")
-        self.setGeometry(150, 100, 1200, 700)
-        self.setMinimumSize(1200, 700)
-
-        # Dataframe kosong (akan diisi dari CSV)
-        self.data = pd.DataFrame()
-
-        # Central widget dan layout utama
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout()
-        central_widget.setLayout(main_layout)
-
-        # ======================
-        # PANEL KIRI: TABLE DATA
-        # ======================
-        left_panel = QGroupBox("Data Table")
-        left_layout = QVBoxLayout()
-        left_panel.setLayout(left_layout)
-
-        # Table view
-        self.table = QTableWidget()
-        left_layout.addWidget(self.table)
-
-        # ======================
-        right_panel = QGroupBox("Visualization")
-        right_layout = QVBoxLayout()
-        right_panel.setLayout(right_layout)
-
-        dropdown_layout = QHBoxLayout()
-        dropdown_layout.addWidget(QLabel("Y Axis:"))
-        self.y_selector = QComboBox()
-        self.y_selector.currentTextChanged.connect(self.update_plot)
-        dropdown_layout.addWidget(self.y_selector)
-        right_layout.addLayout(dropdown_layout)
-
-        self.fig = Figure(figsize=(8, 6))
-        self.canvas = FigureCanvas(self.fig)
-        self.ax = self.fig.add_subplot(111)
-        right_layout.addWidget(self.canvas)
-
-        main_layout.addWidget(left_panel, 4)
-        main_layout.addWidget(right_panel, 6)
-
-        if csv_path:
-            self.load_csv(csv_path)
-        else:
-            pass
-
-    def load_csv(self, path):
-        try:
-            df = pd.read_csv(path)
-            self.on_csv_loaded(df)
-        except Exception as e:
-            self.on_csv_error(e)
-
-    def on_csv_loaded(self, df):
-        self.data = df
-
-        if "Time_s" in self.data.columns:
-            try:
-                self.data["Time_s"] = self.data["Time_s"].astype(float)
-            except Exception:
-                pass
-
-        self.update_table()
-        self.y_selector.clear()
-        if "Time_s" in self.data.columns:
-            y_candidates = [c for c in self.data.columns if c != "Time_s"]
-            self.y_selector.addItems(y_candidates)
-        else:
-            self.y_selector.addItems(self.data.columns)
-
-        self.update_plot()
-
-    def on_csv_error(self, err):
-        print(f"❌ Error reading CSV: {err}")
-
-    def update_table(self):
-        df = self.data
-        self.table.clear()
-        self.table.setRowCount(len(df))
-        self.table.setColumnCount(len(df.columns))
-        self.table.setHorizontalHeaderLabels(df.columns)
-
-        for i in range(len(df)):
-            for j in range(len(df.columns)):
-                item = QTableWidgetItem(str(df.iat[i, j]))
-                self.table.setItem(i, j, item)
-
-        self.table.resizeColumnsToContents()
-
-    def update_plot(self):
-        if self.data.empty:
-            return
-
-        if "Time_s" not in self.data.columns:
-            self.ax.clear()
-            self.ax.text(0.5, 0.5, "'Time_s' column not found!",
-                         ha='center', va='center')
-            self.canvas.draw()
-            return
-
-        y_col = self.y_selector.currentText()
-        if not y_col:
-            return
-
-        try:
-            x = self.data["Time_s"]
-            y = self.data[y_col]
-            self.ax.clear()
-            self.ax.plot(x, y, color="#005a9e", linewidth=2)
-            self.ax.set_title(f"{y_col} vs Time _s")
-            self.ax.set_xlabel("Time (s)")
-            self.ax.set_ylabel(y_col)
-            self.ax.grid(True)
-            self.canvas.draw()
-        except Exception as e:
-            print(f"Error plotting: {e}")
-
-
-class NewConfigWindow(QMainWindow):
-    """Window untuk membuat konfigurasi baru"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.setWindowTitle("New Configuration")
-        self.setGeometry(200, 150, 500, 200)
-        self.setMinimumSize(500, 200)
-
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-
-        layout = QVBoxLayout()
-        central_widget.setLayout(layout)
-
-        # DigSILENT Path
-        layout.addWidget(QLabel("DigSILENT Path:"))
-        path_layout = QHBoxLayout()
-        self.path_input = QLineEdit()
-        self.path_input.setPlaceholderText(
-            "Select DigSILENT installation path...")
-        path_layout.addWidget(self.path_input)
-
-        browse_path_btn = QPushButton("Browse...")
-        browse_path_btn.clicked.connect(self.browse_digsilent_path)
-        path_layout.addWidget(browse_path_btn)
-        layout.addLayout(path_layout)
-
-        # Project Name
-        layout.addWidget(QLabel("Project Name:"))
-        self.project_input = QLineEdit()
-        self.project_input.setPlaceholderText("Enter project name...")
-        layout.addWidget(self.project_input)
-
-        # Buttons
-        btn_layout = QHBoxLayout()
-        save_btn = QPushButton("Save Config")
-        save_btn.clicked.connect(self.save_config)
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.clicked.connect(self.close)
-
-        btn_layout.addStretch()
-        btn_layout.addWidget(save_btn)
-        btn_layout.addWidget(cancel_btn)
-        layout.addLayout(btn_layout)
-
-    def browse_digsilent_path(self):
-        from PyQt5.QtWidgets import QFileDialog
-        path = QFileDialog.getExistingDirectory(self, "Select DigSILENT Path")
-        if path:
-            self.path_input.setText(path)
-
-    def save_config(self):
-        digsilent_path = self.path_input.text()
-        project_name = self.project_input.text()
-
-        if not digsilent_path or not project_name:
-            from PyQt5.QtWidgets import QMessageBox
-            QMessageBox.warning(self, "Warning", "Please fill all fields!")
-            return
-
-        # Emit data ke parent window
-        if self.parent():
-            self.parent().set_config(digsilent_path, project_name)
-
-        self.close()
-
-
-class LoadConfigWindow(QMainWindow):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.setWindowTitle("Load Existing Configuration")
-        self.setGeometry(200, 150, 400, 300)
-        self.setMinimumSize(400, 300)
-
-        self.config = loadSanitizeSavedConfig(
-            os.path.join(os.getcwd(), "config"))
-
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-
-        layout = QVBoxLayout()
-        central_widget.setLayout(layout)
-
-        layout.addWidget(QLabel("Select Configuration:"))
-
-        # List of existing configs
-        self.config_list = QListWidget()
-        self.config_list.addItems(self.config.keys())
-        self.config_list.itemDoubleClicked.connect(self.load_selected_config)
-        layout.addWidget(self.config_list)
-
-        # Buttons
-        btn_layout = QHBoxLayout()
-        load_btn = QPushButton("Load")
-        load_btn.clicked.connect(self.load_selected_config)
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.clicked.connect(self.close)
-
-        btn_layout.addStretch()
-        btn_layout.addWidget(load_btn)
-        btn_layout.addWidget(cancel_btn)
-        layout.addLayout(btn_layout)
-
-    def load_selected_config(self):
-        current_item = self.config_list.currentItem()
-        try:
-            if current_item:
-                config_name = current_item.text()
-
-                # Simulasi load config
-                digsilent_path = loadConfig(self.config[config_name])[
-                    "digsilentpath"]
-                project_name = loadConfig(self.config[config_name])[
-                    "projectname"]
-
-                # Emit data ke parent window
-                if self.parent():
-                    self.parent().set_config(digsilent_path, project_name)
-
-                self.close()
-        except Exception as e:
-            pass
-
-
+from module.digsilent_worker import *
+
+from ui.DetailDynamicUI import *
+from ui.NewConfigUI import *
+from ui.LoadConfigUI import *
+from ui.DetailLoadFlowUI import *
+from ui.ProgressBarUI import *
+  
 class MainWindow(QMainWindow):
     ready_state_changed = pyqtSignal(bool)
 
@@ -347,7 +27,7 @@ class MainWindow(QMainWindow):
 
         self.loadflow_data = None
         self.ready_to_run = False
-        self.dynamic_loadflow_res_file = None
+        self.dynamic_loadflow_res_file = None   
         self.all_study_cases = []
         self.log_texts = []
         self.is_validated = False  # Track validation status
@@ -360,12 +40,27 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
+        self.wrapper_layout = QVBoxLayout()
+
         self.main_layout = QHBoxLayout()
+        self.status_layout = QHBoxLayout()
         self.left_layout = QVBoxLayout()
         self.center_layout = QVBoxLayout()
         self.right_layout = QVBoxLayout()
 
-        self.central_widget.setLayout(self.main_layout)
+        self.wrapper_layout.addLayout(self.main_layout)
+        self.central_widget.setLayout(self.wrapper_layout)
+
+        self.status_label = QLabel("Running....")
+        self.status_layout.addWidget(self.status_label)
+        
+        self.progress_bar = ProgressBar(self, minimum=0, maximum=0, objectName="BlueProgressBar", textVisible=False)
+        self.status_layout.addWidget(self.progress_bar, 1)
+
+        self.wrapper_layout.addLayout(self.status_layout)
+
+        self.status_label.hide()
+        self.progress_bar.hide()
 
         self.left_panel = QGroupBox("Running History")
         self.left_panel.setLayout(self.left_layout)
@@ -382,15 +77,15 @@ class MainWindow(QMainWindow):
         self.config_group.setLayout(self.config_layout)
 
         # Sim time
-        self.config_layout.addWidget(QLabel("Sim time [start, end]"))
-        self.start_sim_spin = QSpinBox()
-        self.start_sim_spin.setRange(0, 10000)
-        self.start_sim_spin.setValue(0)
+        self.config_layout.addWidget(QLabel("Simulation Time"))
+        self.start_sim_spin = QDoubleSpinBox()
+        self.start_sim_spin.setRange(0.0, 100.0)
+        self.start_sim_spin.setValue(0.0)
         self.start_sim_spin.valueChanged.connect(self.update_summary)
 
-        self.stop_sim_spin = QSpinBox()
-        self.stop_sim_spin.setRange(1, 10000)
-        self.stop_sim_spin.setValue(100)
+        self.stop_sim_spin = QDoubleSpinBox()
+        self.stop_sim_spin.setRange(1.0, 300.0)
+        self.stop_sim_spin.setValue(20.0)
         self.stop_sim_spin.valueChanged.connect(self.update_summary)
 
         self.config_layout.addWidget(QLabel("Start Simulation (s):"))
@@ -404,7 +99,7 @@ class MainWindow(QMainWindow):
         self.config_layout.addWidget(self.toggle_usefault)
 
         # Fault time
-        self.config_layout.addWidget(QLabel("Fault time [start, end]"))
+        self.config_layout.addWidget(QLabel("Fault Time"))
         self.start_fault_spin = QDoubleSpinBox()
         self.start_fault_spin.setRange(0, 100.0)
         self.start_fault_spin.setValue(2.0)
@@ -546,29 +241,6 @@ class MainWindow(QMainWindow):
         self.stop_fault_spin.setEnabled(False)
         self.start_sim_btn.setEnabled(True)
 
-    def validate_inputs(self):
-        """Validasi input sesuai rule #4"""
-        start_sim = self.start_sim_spin.value()
-        stop_sim = self.stop_sim_spin.value()
-        start_fault = self.start_fault_spin.value()
-        stop_fault = self.stop_fault_spin.value()
-
-        if start_sim >= stop_sim:
-            QMessageBox.warning(
-                self, "Invalid Input", "Start Simulation must be less than Stop Simulation.")
-            return False
-
-        if self.toggle_usefault.isChecked():
-            if not (start_sim < start_fault < stop_sim):
-                QMessageBox.warning(
-                    self, "Invalid Input", "Start Fault must be between Start and Stop Simulation.")
-                return False
-            if stop_fault >= stop_sim:
-                QMessageBox.warning(
-                    self, "Invalid Input", "Stop Fault must be less than Stop Simulation.")
-                return False
-        return True
-
     def on_toggle_fault_changed(self, state):
         is_checked = self.toggle_usefault.isChecked()
         self.start_fault_spin.setEnabled(is_checked)
@@ -603,7 +275,7 @@ class MainWindow(QMainWindow):
         os.path.abspath(data_path)
 
         hist_list = os.listdir(data_path)
-        print(hist_list)
+        # print(hist_list)
 
         self.history_list.clear()
 
@@ -621,11 +293,11 @@ class MainWindow(QMainWindow):
             print(history_name)
             with open(history_name, "r") as file:
                 data_dict = json.load(file)
-            detail_window = DetailLoadflowWindow("Load Flow Simulation", data_dict, self)
+            detail_window = DetailLoadflowWindow(data_dict, self)
             detail_window.show()
             self.detail_windows.append(detail_window)
         else:
-            detail_window = DetailDynamicWindow("Dynamic Simulation", history_name, self)
+            detail_window = DetailDynamicWindow(history_name, self)
             detail_window.show()
             self.detail_windows.append(detail_window)
 
@@ -635,12 +307,9 @@ class MainWindow(QMainWindow):
             return  # Jangan lakukan apa-apa jika belum validated
 
         if text == "Load Flow":
-            # Load Flow: semua field simulasi disabled
             self.disable_simulation_fields()
-            # Enable tombol run saja
             self.start_sim_btn.setEnabled(True)
         elif text == "Dynamic Simulation":
-            # Dynamic Simulation: semua field aktif
             self.enable_simulation_fields()
 
         self.update_summary()
@@ -652,7 +321,7 @@ class MainWindow(QMainWindow):
 
     def on_load_config_clicked(self):
         """Handler untuk tombol Exist Load Config"""
-        load_config_window = LoadConfigWindow(self)
+        load_config_window = LoadConfigWindow(os.getcwd(), self)
         load_config_window.show()
 
     def set_config(self, digsilent_path, project_name):
@@ -668,197 +337,145 @@ class MainWindow(QMainWindow):
     def on_validate_clicked(self):
         digsilent_path = self.digsilent_path_label.text()
         project_name = self.project_name_label.text()
-        import subprocess
+        self.start_sim_btn.setEnabled(False)
+        self.validate_btn.setEnabled(False)
+        self.scenario_combobox.setEnabled(False)
+        self.cases_combobox.setEnabled(False)
+        self.validate_btn.setText("Validating...")
+        self.progress_bar.show()
 
         if digsilent_path == "-" or project_name == "-":
             QMessageBox.warning(
                 self, "Warning", "Please load or create a config first!"
             )
+            self.start_sim_btn.setEnabled(True)
+            self.validate_btn.setEnabled(True)
+            self.validate_btn.setText("Validate")
+            self.progress_bar.hide()
             return
 
         self.append_log("[INFO] Starting validation of DIgSILENT PowerFactory configuration...")
 
-        try:
-            process = subprocess.Popen(
-                [
-                    "python",
-                    "worker_connectandsetup.py",
-                    "--digsilent_path", digsilent_path,
-                    "--project_name", project_name
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-
-            stdout, stderr = process.communicate()
-            
-            print("=== STDOUT ===")
-            print(stdout)
-            print("=== STDERR ===")
-            print(stderr)
-
-            if stderr.strip():
-                self.append_log(f"[ERROR] {stderr.strip()}")
-                QMessageBox.critical(self, "Error", stderr.strip())
-                self.is_validated = False
-                return
-
-            parts = stdout.strip().split("|")
-            if len(parts) >= 3 and parts[0] == "SUCCESS":
-                message = parts[1]
-                study_cases = parts[2].split(",") if parts[2] else []
-
-                self.on_validate_success(message)
-                self.all_study_cases = study_cases
-                self.cases_combobox.clear()
-                self.cases_combobox.addItems(study_cases)
-
-                self.is_validated = True
-                self.scenario_combobox.setEnabled(True)
-                self.cases_combobox.setEnabled(True)
-                self.on_scenario_changed(self.scenario_combobox.currentText())
-
-            elif len(parts) >= 2 and parts[0] == "ERROR":
-                message = parts[1]
-                self.on_validate_error(message)
-                self.is_validated = False
-            else:
-                self.append_log(f"[ERROR] Unexpected worker response: {stdout}")
-                QMessageBox.critical(self, "Error", f"Unexpected output:\n{stdout}")
-                self.is_validated = False
-
-        except Exception as e:
-            self.append_log(f"[EXCEPTION] {str(e)}")
-            QMessageBox.critical(self, "Exception", str(e))
-            self.is_validated = False
-
-    def on_validate_success(self, message: str):
-        """Dipanggil kalau validasi PowerFactory berhasil"""
-        self.append_log(f"[INFO] Validation completed: {message}")
-        self.refresh_result()
-        QMessageBox.information(
-            self, "Success", "Configuration validated successfully! You can now select scenario and case."
+        self.connectandsetupthread = QThread()
+        self.digsilent_worker = DigsilentWorker(
+            digsilent_path=digsilent_path,
+            proj_name=project_name,
+            case_name=None,
+            start_sim=None,
+            stop_sim=None,
+            sim_step=None,
+            start_fault=None,
+            stop_fault=None,
+            fault_type=None,
         )
 
-    def on_validate_error(self, message: str):
-        """Dipanggil kalau validasi gagal"""
-        self.append_log(f"[ERROR] Validation failed: {message}")
-        QMessageBox.critical(self, "Error", f"Validation failed:\n{message}")
+        self.digsilent_worker.moveToThread(self.connectandsetupthread)
+        self.connectandsetupthread.started.connect(self.digsilent_worker.work_connectsetup)
+        
+        self.connectandsetupthread.start()
+
+        self.digsilent_worker.message.connect(self.on_message_pf)
+        self.digsilent_worker.finishpayload.connect(self.on_finished_pf)
+        
+        self.digsilent_worker.finished.connect(self.digsilent_worker.deleteLater)
+        self.connectandsetupthread.finished.connect(self.connectandsetupthread.deleteLater)
+        self.digsilent_worker.finished.connect(self.connectandsetupthread.quit)
+    
+    def on_finished_pf(self, data):
+        self.append_log(f"[INFO] Done running the process")
+        self.progress_bar.hide()
+        self.start_sim_btn.setEnabled(False)
+        self.start_sim_btn.setText("running...")
+
+        if data["status"] == "ERROR":
+            QMessageBox.warning(
+                self, f"{data['type']} Status {data['status']}", data['msg']
+            )
+        elif data["status"] == "SUCCESS":
+            QMessageBox.information(
+                self, f"{data['type']} Status {data['status']}", data['msg']
+            )
+            if data["type"] == "CONNECTANDSETUP":
+                self.cases_combobox.addItems(data["data"].split(","))
+            
+            elif data["type"] == "LOADFLOW":
+                pass
+
+            self.refresh_result()
+        else:
+            QMessageBox.information(
+                self, "Undefined process status", "Process is done, do it again"
+            )
+        
+        self.validate_btn.setEnabled(True)
+        self.start_sim_btn.setEnabled(True)
+        self.scenario_combobox.setEnabled(True)
+        self.cases_combobox.setEnabled(True)
+        self.validate_btn.setText("Validate")
+        self.start_sim_btn.setText("Start Simulation")
+    
+    def on_message_pf(self, msg):
+        self.append_log(msg)
 
     def on_run_button(self):
-        if self.scenario_combobox.currentText() == "Dynamic Simulation":
-            if not self.validate_inputs():
-                return
+        self.start_sim_btn.setEnabled(False)
+        self.validate_btn.setEnabled(False)
+        self.scenario_combobox.setEnabled(False)
+        self.cases_combobox.setEnabled(False)
+        self.progress_bar.show()
 
-        import subprocess
-
-        if (self.scenario_combobox.currentText() == "Load Flow"):
-            digsilent_path = self.digsilent_path_label.text()
-            project_name = self.project_name_label.text()
-            case_name = self.cases_combobox.currentText()
-
-            print("Starting PowerFactory loadflow process...")
-
-            process = subprocess.Popen(
-                [
-                    "python.exe",
-                    "worker_runloadflow.py",
-                    "--digsilent_path", digsilent_path,
-                    "--proj_name", project_name,
-                    "--case_name", case_name,
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+        if self.scenario_combobox.currentText() == "Load Flow":
+            self.loadflow_thread = QThread()
+            self.digsilent_worker = DigsilentWorker(
+                digsilent_path=self.digsilent_path_label.text(),
+                proj_name=self.project_name_label.text(),
+                case_name=self.cases_combobox.currentText(),
+                start_sim=None,
+                stop_sim=None,
+                sim_step=None,
+                start_fault=None,
+                stop_fault=None,
+                fault_type=None,
             )
 
-            stdout, stderr = process.communicate()
+            self.digsilent_worker.moveToThread(self.loadflow_thread)
+            self.loadflow_thread.started.connect(self.digsilent_worker.work_runloadflow)
 
-            print("=== STDOUT ===")
-            print(stdout)
-            print("=== STDERR ===")
-            print(stderr)
+            self.loadflow_thread.start()
 
-            lines = [line.strip()
-                     for line in stdout.splitlines() if line.strip()]
-            status = False
-            data = ""
+            self.digsilent_worker.finishpayload.connect(self.on_message_pf)
+            self.digsilent_worker.finishpayload.connect(self.on_finished_pf)
 
-            if len(lines) >= 2:
-                if lines[0] == "SUCCESS":
-                    status = True
-                    data = lines[1]
-                elif lines[0] == "FAILED":
-                    status = False
-                    data = lines[1]
-
-            if status:
-                self.log_text.append("[SUCCESS] Success running loadflow")
-                from PyQt5.QtWidgets import QMessageBox
-                QMessageBox.information(
-                    self, "Success", f"Success running loadflow\n\n{data}")
-                self.loadflow_data = data
-                self.refresh_result()
-            else:
-                self.log_text.append(
-                    f"[ERROR] Failed running loadflow: {data}")
-                from PyQt5.QtWidgets import QMessageBox
-                QMessageBox.critical(
-                    self, "Error", f"Error running loadflow:\n\n{data}")
+            self.digsilent_worker.finished.connect(self.digsilent_worker.deleteLater)
+            self.loadflow_thread.finished.connect(self.loadflow_thread.deleteLater)
+            self.digsilent_worker.finished.connect(self.loadflow_thread.quit)
 
         elif self.scenario_combobox.currentText() == "Dynamic Simulation":
-            start_sim = self.start_sim_spin.value()
-            stop_sim = self.stop_sim_spin.value()
-            isusing_fault = self.toggle_usefault.isChecked()
-            start_fault = self.start_fault_spin.value()
-            stop_fault = self.stop_fault_spin.value()
-
-            digsilent_path = self.digsilent_path_label.text()
-            project_name = self.project_name_label.text()
-
-            args = [
-                "python",
-                "worker_dynamic.py",
-                "--digsilent_path", digsilent_path,
-                "--project_name", project_name,
-                "--start_time", str(start_sim),
-                "--stop_time", str(stop_sim)
-            ]
-            
-            if isusing_fault:
-                args += [
-                    "--start_fault", str(start_fault),
-                    "--clear_fault", str(stop_fault)
-                ]
-
-            from PyQt5.QtWidgets import QMessageBox
-            import subprocess
-
-            process = subprocess.Popen(
-                args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+            self.dynamicrun_thread = QThread()
+            self.digsilent_worker = DigsilentWorker(
+                digsilent_path=self.digsilent_path_label.text(),
+                proj_name=self.project_name_label.text(),
+                case_name=self.cases_combobox.currentText(),
+                start_sim=self.start_sim_spin.value(),
+                stop_sim=self.stop_sim_spin.value(),
+                sim_step=1,
+                start_fault=self.start_fault_spin.value(),
+                stop_fault=self.stop_fault_spin.value(),
+                fault_type=None,
             )
 
-            stdout, stderr = process.communicate()
-            
-            print("=== STDOUT ===")
-            print(stdout)
-            print("=== STDERR ===")
-            print(stderr)
+            self.digsilent_worker.moveToThread(self.dynamicrun_thread)
+            self.dynamicrun_thread.started.connect(self.digsilent_worker.work_runloadflow)
 
-            if process.returncode != 0 or stderr:
-                self.log_text.append(f"[ERROR] {stderr.strip()}")
-                QMessageBox.critical(self, "Error", stderr.strip())
-            else:
-                self.log_text.append(stdout.strip())
-                self.refresh_result()
-                QMessageBox.information(self, "Success", stdout.strip())
+            self.dynamicrun_thread.start()
 
-        else:
-            print(self.scenario_combobox.currentText())
+            self.digsilent_worker.finishpayload.connect(self.on_message_pf)
+            self.digsilent_worker.finishpayload.connect(self.on_finished_pf)
+
+            self.digsilent_worker.finished.connect(self.digsilent_worker.deleteLater)
+            self.dynamicrun_thread.finished.connect(self.dynamicrun_thread.deleteLater)
+            self.digsilent_worker.finished.connect(self.dynamicrun_thread.quit)
+
         print("Finished....")
 
 if __name__ == "__main__":
