@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QLabel
 )
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal, QThread, Qt
 from ui.ProgressBarUI import ProgressLoaderBar
 from module.digsilentpf_worker import DigsilentWorker
 
@@ -23,6 +23,9 @@ class LoadflowProcessDialogUI(QDialog):
         self.setWindowIcon(QIcon(r"C:\Users\Alex\NgodingDulu\project-hmi-nuklir-new\asset\logo-ugm.jpg"))
         self.setFixedWidth(480)
         self.setFixedHeight(120)
+        
+        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowFlag(Qt.WindowCloseButtonHint, False)
         
         self.ds_pf_pathfle = ds_pf_pathfle
         self.proj_name = proj_name

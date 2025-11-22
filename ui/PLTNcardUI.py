@@ -1,15 +1,12 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QCheckBox
+    QLabel, QPushButton
 )
-from PyQt5.QtCore import pyqtSignal
 from ui.UIStyle import (
     NAV_BUTTON_STYLESHEET, CARD_CONTAINER_STYLESHEET, CARD_TITLE_STYLESHEET, CARD_CONTENT_STYLESHEET
 )
 
 class PLTNCardUI(QWidget):
-    checkedChanged = pyqtSignal(bool)
-
     def __init__(self, title, desccontent, pfd_path_file):
         super().__init__()
         
@@ -34,13 +31,9 @@ class PLTNCardUI(QWidget):
         self.card_brief_content.setStyleSheet(CARD_CONTENT_STYLESHEET)
         self.card_brief_content.setWordWrap(True)
 
-        self.card_check = QCheckBox("Pilih System Ini")
-        self.card_check.stateChanged.connect(self.on_check_changed)
-
         card_layout.addWidget(self.card_title)
         card_layout.addWidget(card_download_pfd)
         card_layout.addWidget(self.card_brief_content)
-        card_layout.addWidget(self.card_check)
         card_widget.setLayout(card_layout)
 
         card_center_layout = QHBoxLayout()
@@ -49,9 +42,6 @@ class PLTNCardUI(QWidget):
         card_center_layout.addStretch()
 
         self.setLayout(card_center_layout)
-
-    def on_check_changed(self, state):
-        self.checkedChanged.emit(state == 2)
     
     def update_card(self, title, desccontent, pfd_path_file):
         self.card_title.setText(title)

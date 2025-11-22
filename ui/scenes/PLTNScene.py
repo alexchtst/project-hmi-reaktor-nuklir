@@ -55,6 +55,11 @@ class PLTNOptionScreenScene(QWidget):
         
         default_key = SYSTEM_PROVIDED[0]
         data = SYSTEM_PROVIDED_DADATA[default_key]
+        
+        self.validation_status = {
+            "39 Bus New England System": False,
+            "Nine-bus System": False
+        }
 
         self.card_widget = PLTNCardUI(
             title=data["title"],
@@ -66,8 +71,6 @@ class PLTNOptionScreenScene(QWidget):
         self.btn.setStyleSheet(NAV_BUTTON_STYLESHEET)
         self.btn.setEnabled(False)
         self.btn.clicked.connect(self.on_send_pltn_system_change)
-
-        self.card_widget.checkedChanged.connect(self.btn.setEnabled)
 
         pltn_system_layout = QHBoxLayout()
         pltn_system_layout.addStretch()
@@ -96,19 +99,8 @@ class PLTNOptionScreenScene(QWidget):
         self.selected_path_label = QLabel(self.current_digsilent_pf_pth)
         selected_path_label.addWidget(self.selected_path_label)
         
-        # [START] comment this letter
-        verification_btn_layout = QHBoxLayout()
-        verification_btn_layout.addStretch()
-        self.verivication_btn = QPushButton("Verifikasi")
-        verification_btn_layout.addWidget(self.verivication_btn)
-        self.verivication_btn.setStyleSheet(FINDPATH_BUTTON_STYLESHEET)
-        self.verivication_btn.clicked.connect(self.on_verification_btn)
-        self.verivication_btn.hide()
-        # [END] comment this letter
-        
         wraper_path_layout.addLayout(find_btn_layout)
         wraper_path_layout.addLayout(selected_path_label)
-        wraper_path_layout.addLayout(verification_btn_layout)
         find_path_layout.addLayout(wraper_path_layout)
 
         layout.addWidget(title)
@@ -117,7 +109,7 @@ class PLTNOptionScreenScene(QWidget):
         layout.addLayout(find_path_layout)
         layout.addStretch(1)
         layout.addWidget(self.card_widget)
-        layout.addStretch(2)
+        layout.addStretch(1)
         layout.addWidget(self.btn)
         self.setLayout(layout)
     
@@ -126,14 +118,14 @@ class PLTNOptionScreenScene(QWidget):
         
         data = SYSTEM_PROVIDED_DADATA[value]
         
-        self.card_widget.card_check.setChecked(False)
+        self.btn.setEnabled(self.validation_status[value])
+        
         self.card_widget.update_card(
             title=data["title"],
             desccontent=data["desccontent"],
             pfd_path_file=data["pfd_path_file"]
         )
         
-        self.btn.setEnabled(False)
     
     def select_digsilent_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Pilih Folder DigSilent Python version")
@@ -164,5 +156,6 @@ class PLTNOptionScreenScene(QWidget):
         self.progress_dialog.show()
     
     def on_finished_with_payload(self, value):
+        self.validation_status[self.current_pltn_system] = True
         self.casessignal.emit(value["data"])
-        
+        self.btn.setEnabled(self.validation_status[self.current_pltn_system])
