@@ -2,3 +2,4 @@ PyQt5
 matplotlib
 pandas
 openpyxl
+python-dotenv

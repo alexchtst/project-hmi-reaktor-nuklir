@@ -1,0 +1,2 @@
+def dialogsuccess():
+    return "dialogsuccess"

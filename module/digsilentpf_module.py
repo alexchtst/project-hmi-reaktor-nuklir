@@ -104,7 +104,7 @@ def running_loadflow(
         if not os.path.exists(digsilent_path):
             raise OSError(f"{digsilent_path} does not exist")
 
-        print(f"[INFO]: Activating project...")
+        print(f"[INFO]: loadflow Activating project...")
         sys.path.append(rf"{digsilent_path}")
         import powerfactory as pf
 
@@ -125,7 +125,9 @@ def running_loadflow(
         print(f"[INFO]: Validating all study cases project...")
         all_study_cases = study_case_folder.GetContents()
         
-
+        if study_case_folder is None:
+            raise ValueError("[INFO]: Study case folder not found. Project mungkin tidak punya folder 'study'.")
+        
         study_case = None
         for obj in all_study_cases:
             if obj.loc_name.strip() == case_name.strip():
@@ -134,7 +136,7 @@ def running_loadflow(
         
         if study_case is None:
             raise ValueError(
-                f"Study case '{case_name}' not found in project '{proj_name}'")
+                f"[INFO]: Study case '{case_name}' not found in project '{proj_name}'")
 
         study_case.Activate()
         print(f"[DONE]: Success getting all study cases project")
@@ -226,7 +228,7 @@ def running_loadflow(
         return True, "Success running loadflow and collect all the data", setup_load_showeddata(insert_to, output_dir)
 
     except Exception as e:
-        return False, f"Error happened: {str(e)}", ""
+        return False, f"[DONE]: Error happened: {str(e)}", ""
 
 # "ElmSym": ["s:xspeed", "m:P:bus1", "m:Q:bus1", "m:u:bus1", "m:fe"],
 # "ElmTerm": ["m:u", "m:phiu", "m:fehz"],
@@ -262,6 +264,7 @@ def run_dynamic_simulation(
         if not os.path.exists(digsilent_path):
             raise OSError(f"{digsilent_path} is not exist")
 
+        print(f"[INFO]: Activating project...")
         sys.path.append(rf"{digsilent_path}")
         import powerfactory as pf
 
@@ -271,11 +274,13 @@ def run_dynamic_simulation(
 
         app.ClearOutputWindow()
         app.ResetCalculation()
+        print(f"[DONE]: Success activating project")
 
         project = app.ActivateProject(proj_name)
         if project is None:
             raise RuntimeError(f"Cannot activate project '{proj_name}'")
-
+        
+        print(f"[INFO]: Activating study cases project...")
         study_case = app.GetActiveStudyCase()
         if study_case is None:
             study_cases = app.GetProjectFolder(
@@ -289,7 +294,9 @@ def run_dynamic_simulation(
             if study_case is None:
                 raise RuntimeError(
                     f"Cannot find or activate study case '{case_name}'")
+        print(f"[DONE]: Success getting all study cases project")
 
+        print(f"[INFO]: Running intial condition...")
         comInc = app.GetFromStudyCase("ComInc")
         comSim = app.GetFromStudyCase("ComSim")
 
@@ -307,10 +314,12 @@ def run_dynamic_simulation(
 
         comInc.Execute()
         elmRes = comInc.p_resvar
+        print(f"[DONE]: Success running intial condition")
 
         if elmRes is None:
             raise RuntimeError("Cannot get result variable object")
 
+        print(f"[INFO]: Setup fault event (shc)")
         faultFolder = app.GetFromStudyCase("Simulation Events/Fault.IntEvt")
         if faultFolder is not None:
             cont = faultFolder.GetContents()
@@ -351,6 +360,7 @@ def run_dynamic_simulation(
                 fault_configured = True
         else:
             pass
+        print(f"[DONE]: Success settingup fault event (shc)")
 
         total_vars = 0
         for element_type, variables in properties_data_name.items():
@@ -368,6 +378,7 @@ def run_dynamic_simulation(
         comInc.Execute()
         app.EchoOn()
 
+        print(f"[INFO]: Running dynamic simulation")
         result = comSim.Execute()
 
         if result != 0:
@@ -377,11 +388,13 @@ def run_dynamic_simulation(
 
         nCols = elmRes.GetNumberOfColumns()
         nRows = elmRes.GetNumberOfRows()
+        print(f"[DONE]: Success running dynamic simulation")
 
         from datetime import datetime
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
+        print(f"[INFO]: Collecting all running dynamic simulation data")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         sim_type = "with_fault" if fault_configured else "no_fault"
         datapath_result = os.path.join(
@@ -414,7 +427,7 @@ def run_dynamic_simulation(
 
                     writer.writerow(dataRow)
                     rows_written += 1
-
+        print(f"[DONE]: Success collecting all running dynamic simulation data")
         elmRes.Release()
 
         return True, f"Success to run dynamic simulation. Rows written: {rows_written}", datapath_result
@@ -422,5 +435,5 @@ def run_dynamic_simulation(
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
-        error_message = f"Error happened: {str(e)}\n\nDetails:\n{error_details}"
+        error_message = f"dynamic Error happened: {str(e)}\n\nDetails:\n{error_details}"
         return False, error_message, "-"

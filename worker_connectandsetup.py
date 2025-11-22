@@ -1,6 +1,6 @@
 # worker_validate.py
 import argparse
-from module.digsilent_pf import connectandsetup
+from module.digsilentpf_module import connectandsetup
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -11,6 +11,6 @@ if __name__ == "__main__":
     success, message, cases = connectandsetup(args.digsilent_path, args.project_name)
 
     if success:
-        print(f"SUCCESS|{message}|{','.join(cases)}")
+        print(f"FINISH|SUCCESS|{message}|{','.join(cases)}|CONNECTANDSETUP")
     else:
-        print(f"ERROR|{message}")
+        print(f"FINISH|ERROR|{message}|..|CONNECTANDSETUP")

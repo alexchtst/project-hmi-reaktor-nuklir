@@ -1,5 +1,5 @@
 import argparse
-from module.digsilent_pf import running_loadflow
+from module.digsilentpf_module import running_loadflow
 import os
 
 def main():
@@ -9,7 +9,7 @@ def main():
     parser.add_argument("--case_name", required=True)
     args = parser.parse_args()
     
-    success, data = running_loadflow(
+    success, message, path = running_loadflow(
         digsilent_path=args.digsilent_path,
         proj_name=args.proj_name,
         case_name=args.case_name,
@@ -17,11 +17,12 @@ def main():
     )
     
     if success:
-        print("SUCCESS")
-        print(data)
+        print(f"FINISH|SUCCESS|{message}|{path}|LOADFLOW")
     else:
-        print("FAILED")
-        print(data)
+        print(f"FINISH|ERROR|{message}|..|LOADFLOW")
 
 if __name__ == "__main__":
     main()
+    
+
+# python yourscript.py --digsilent_path "C:\Program Files\DIgSILENT\PowerFactory 2022\Python\3.8" --proj_name "NamaProjectAnda" --case_name "NamaStudyCase"

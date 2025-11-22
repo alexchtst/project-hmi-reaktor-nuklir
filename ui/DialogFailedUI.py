@@ -1,0 +1,2 @@
+def dialoguitest():
+    return "dialoguitest"

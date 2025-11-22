@@ -2,12 +2,14 @@ from random import randint
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QProgressBar
 
-from module.qt_custom_style import CUSTOM_GLOBAL_STYLESHEET
+from ui.UIStyle import PROGRESS_BAR_STYLE_SHEET
 
-class ProgressBar(QProgressBar):
+class ProgressLoaderBar(QProgressBar):
     def __init__(self, *args, **kwargs):
-        super(ProgressBar, self).__init__(*args, **kwargs)
+        super(ProgressLoaderBar, self).__init__(*args, **kwargs)
         self.setValue(0)
+        
+        self.setStyleSheet(PROGRESS_BAR_STYLE_SHEET)
 
         if self.minimum() != self.maximum():
             self.timer = QTimer(self, timeout=self.onTimeout)

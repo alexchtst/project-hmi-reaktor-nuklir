@@ -1,12 +1,13 @@
 # worker_dynamic.py
 import argparse
-from module.digsilent_pf import run_dynamic_simulation
+from module.digsilentpf_module import run_dynamic_simulation
 import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--digsilent_path", required=True)
     parser.add_argument("--project_name", required=True)
+    parser.add_argument("--case_name", required=True)
     parser.add_argument("--start_time", type=float, default=-0.1)
     parser.add_argument("--stop_time", type=float, default=5)
     parser.add_argument("--start_fault", type=float, default=0)
@@ -19,6 +20,7 @@ if __name__ == "__main__":
     success, message, filepath = run_dynamic_simulation(
         digsilent_path=args.digsilent_path,
         proj_name=args.project_name,
+        case_name=args.case_name,
         start_time_simulation=args.start_time,
         stop_time_simulation=args.stop_time,
         start_fault=args.start_fault,
@@ -30,6 +32,6 @@ if __name__ == "__main__":
     )
 
     if success:
-        print(f"[SUCCESS] {message} | Filepath: {filepath}")
+        print(f"FINISH|SUCCESS|{message}|{filepath}|DYNAMIC")
     else:
-        print(f"[FAILED] {message}")
+        print(f"FINISH|ERROR|{message}|..|DYNAMIC")
