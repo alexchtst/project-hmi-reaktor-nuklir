@@ -152,26 +152,34 @@ class DigsilentWorker(QObject):
                 start_fault == None or 
                 start_sim == None or 
                 stop_sim == None or 
-                stop_fault == None or 
-                sim_step == None
-                # fault_type == None
+                stop_fault == None
             ):
-                raise TypeError("invalid input time")
+                print(
+                    start_fault , stop_fault ,
+                    stop_fault , stop_sim ,
+                    start_sim , stop_sim ,
+                    start_sim , start_fault
+                )
+                raise TypeError("invalid input time none check")
 
             if (
                 start_fault > stop_fault or
                 stop_fault > stop_sim or
                 start_sim > stop_sim or
                 start_sim > start_fault
-                # sim_step > abs(start_fault - stop_fault)
-                # sim_step > abs(start_sim - stop_sim)
             ):
-                raise TypeError("invalid input time")
+                print(
+                    start_fault , stop_fault ,
+                    stop_fault , stop_sim ,
+                    start_sim , stop_sim ,
+                    start_sim , start_fault
+                )
+                raise TypeError("invalid input time less")
 
             import subprocess
             with subprocess.Popen(
                 [
-                    "python", "worker_dynamic.py", # belom ada [TODO]: BUAT NANTI LEX
+                    "python", "worker_dynamic.py",
                     "--digsilent_path", dgpath,
                     "--project_name", prjname,
                     "--case_name", casename,

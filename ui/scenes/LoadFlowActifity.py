@@ -247,8 +247,6 @@ class LoadflowActifityScreenScene(QWidget):
         projname = self.__projectname
         case = self.__selected_case
 
-        print(df_path, projname, case)
-
         self.progress_dialog = LoadflowProcessDialogUI(
             ds_pf_pathfle=df_path,
             proj_name=projname,

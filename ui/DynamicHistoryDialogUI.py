@@ -151,6 +151,5 @@ class DynamicHistoryDialogUI(QDialog):
     def on_select_clicked(self):
         sender = self.sender()
         filepath = sender.property("filepath")
-        print(filepath)
         self.datareading.emit(filepath)
         self.accept()
