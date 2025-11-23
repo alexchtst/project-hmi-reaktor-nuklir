@@ -1,5 +1,6 @@
-# worker_validate.py
+# worker_connectandsetup.py
 import argparse
+import json
 from module.digsilentpf_module import connectandsetup
 
 if __name__ == "__main__":
@@ -8,9 +9,13 @@ if __name__ == "__main__":
     parser.add_argument("--project_name", required=True)
     args = parser.parse_args()
 
-    success, message, cases = connectandsetup(args.digsilent_path, args.project_name)
+    success, message, cases, events_data = connectandsetup(args.digsilent_path, args.project_name)
 
     if success:
-        print(f"FINISH|SUCCESS|{message}|{','.join(cases)}|CONNECTANDSETUP")
+        events_json = json.dumps(events_data, ensure_ascii=False)
+        import base64
+        events_encoded = base64.b64encode(events_json.encode('utf-8')).decode('utf-8')
+        
+        print(f"FINISH|SUCCESS|CONNECTANDSETUP|{message}|{','.join(cases)}|{events_encoded}")
     else:
-        print(f"FINISH|ERROR|{message}|..|CONNECTANDSETUP")
+        print(f"TERMINATE|ERROR|CONNECTANDSETUP|{message}|..|")

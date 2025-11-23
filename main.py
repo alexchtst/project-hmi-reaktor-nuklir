@@ -20,6 +20,7 @@ class MainApp(QStackedWidget):
         self.digsilent_path = None
         
         self.cases = []
+        self.eventcases = {}
 
         # Buat scene scene
         self.splash = CoverScreenScene()
@@ -53,12 +54,16 @@ class MainApp(QStackedWidget):
         self.pltn.pltnsystemsignal.connect(self.on_listen_pltn_system)
         self.pltn.digsilentpathsignal.connect(self.on_listen_digsilent_path)
         self.pltn.casessignal.connect(self.on_pltn_connect_signal)
+        self.pltn.casseseventsignal.connect(self.on_pltn_connect_caseseventsignal)
 
         self.setMinimumSize(1020, 680)
         self.setCurrentIndex(0)
     
     def on_pltn_connect_signal(self, value):
         self.cases = value
+        
+    def on_pltn_connect_caseseventsignal(self, value):
+        self.eventcases = value
     
     def on_listen_pltn_system(self, value):
         self.pltnssytemprojetcname = value
@@ -90,6 +95,7 @@ class MainApp(QStackedWidget):
         self.dynamic.ds_pf_path_signal.emit(self.digsilent_path)
         self.dynamic.project_name_signal.emit(self.pltnssytemprojetcname)
         self.dynamic.caseses_signal.emit(self.cases)
+        self.dynamic.casesesevent_signal.emit(self.eventcases)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -4,40 +4,99 @@ def connectandsetup(digsilent_path, proj_name):
 
     try:
         if not os.path.exists(digsilent_path):
-            raise OSError(f"{digsilent_path} is not exist")
+            raise OSError(f"{digsilent_path} tidak terdeteksi")
 
         print(f"[INFO]: Activating project...")
         sys.path.append(f"{os.path.abspath(digsilent_path)}")
         import powerfactory as pf
 
         app = pf.GetApplication()
+        if app is None:
+            raise RuntimeError(
+                "Tidak dapat membuka digsilent, coba perhatikan digsilent path anda atau terminate applikasi digsilent anda terlebih dahulu.")
+
         app.ClearOutputWindow()
+        app.ResetCalculation()
 
         project = app.ActivateProject(proj_name)
-        print(f"[DONE]: Success activating project")
+        print(f"[DONE]: Berhasil mengaktivasi project")
 
         if project == None:
-            raise TypeError(f"Error: project is none")
-        
-        print(f"[INFO]: Activating study cases project...")
-        study_case_folder = app.GetProjectFolder("study")
-        print(f"[INFO]: Getting all study cases project...")
-        all_study_cases = study_case_folder.GetContents()
-        print(f"[DONE]: Success getting all study cases project")
+            raise TypeError(
+                f"Tidak dapat mengaktifkan project {proj_name}, download pfd file dan load di digsilent terlebih dahulu.")
 
+        print(f"[INFO]: Activasi study cases project...")
+        study_case_folder = app.GetProjectFolder("study")
+        print(f"[INFO]: Melakukan pengecekan pada study case")
+        all_study_cases = study_case_folder.GetContents('*.IntCase')
+
+        events_cases = {}
+
+        if not all_study_cases:
+            print("[WARNING]: Tidak ada study case yang terdeteksi")
+            raise Exception("Study Case gagal di load.")
+
+        for case in all_study_cases:
+            case_name = case.loc_name
+            print(f"[INFO]: Mengecek study case: {case_name}")
+            case.Activate()
+
+            event_folder = app.GetFromStudyCase('IntEvt')
+
+            if event_folder is None:
+                print(
+                    f"[WARNING]: Study case '{case_name}' tidak memiliki event folder")
+                events_cases[case_name] = []
+                continue
+
+            all_events = event_folder.GetContents()
+            if not all_events:
+                print(
+                    f"[WARNING]: Study case '{case_name}' tidak memiliki event yang di setup")
+                events_cases[case_name] = []
+                continue
+
+            # Menyimpan informasi event
+            event_list = []
+            for event in all_events:
+                event_info = {
+                    'name': event.loc_name,
+                    'class': event.GetClassName(),
+                }
+
+                # Tambahkan informasi spesifik berdasarkan tipe event
+                try:
+                    if hasattr(event, 'p_target') and event.p_target:
+                        event_info['target'] = event.p_target.loc_name
+                    if hasattr(event, 'time'):
+                        event_info['time'] = event.time
+                    if hasattr(event, 'i_switch'):
+                        # 0=open, 1=close
+                        event_info['switch_state'] = event.i_switch
+                except:
+                    pass
+
+                event_list.append(event_info)
+
+            events_cases[case_name] = event_list
+            print(
+                f"[INFO]: {len(all_events)} event ditemukan di study case '{case_name}'")
+
+        print(f"[DONE]: Berhasil mengecek semua study case")
         cases = [obj.loc_name for obj in all_study_cases]
 
-        print(f"[DONE]: Success to connect with the digsilent python path api")
-        return True, "Success to connect with the digsilent python path api", cases
-    except Exception as e:
-        print(f"[ERROR]: Error happened :{str(e)}")
-        return False, f"Error happened :{str(e)}", ""
+        print(
+            f"[DONE]: Berhasil mengkoneksikan digsilent power factory api dengan applikasi")
+        return True, "Berhasil mengkoneksikan digsilent power factory api dengan applikasi", cases, events_cases
 
+    except Exception as e:
+        print(f"[ERROR]: Terjadi Error :{str(e)}")
+        return False, f"Terjadi Error :{str(e)}", [], {}
 
 def setup_load_showeddata(
     data_dictionary,
-    project_name = None,
-    case_name = None,
+    project_name=None,
+    case_name=None,
     output_dir="../data"
 ):
     data_voltage = []
@@ -76,7 +135,7 @@ def setup_load_showeddata(
 
     # Buat nama file dinamis berdasarkan waktu
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    
+
     if project_name is not None or case_name is not None:
         filename = f"loadflow-{project_name}-{case_name}-{timestamp}.json"
     else:
@@ -88,7 +147,6 @@ def setup_load_showeddata(
         json.dump(result_data, f, indent=4, ensure_ascii=False)
 
     return filepath
-
 
 def safe_getattr(obj, attr, default=0):
     try:
@@ -133,16 +191,17 @@ def running_loadflow(
         study_case_folder = app.GetProjectFolder("study")
         print(f"[INFO]: Validating all study cases project...")
         all_study_cases = study_case_folder.GetContents()
-        
+
         if study_case_folder is None:
-            raise ValueError("[INFO]: Study case folder not found. Project mungkin tidak punya folder 'study'.")
-        
+            raise ValueError(
+                "[INFO]: Study case folder not found. Project mungkin tidak punya folder 'study'.")
+
         study_case = None
         for obj in all_study_cases:
             if obj.loc_name.strip() == case_name.strip():
                 study_case = obj
                 break
-        
+
         if study_case is None:
             raise ValueError(
                 f"[INFO]: Study case '{case_name}' not found in project '{proj_name}'")
@@ -180,7 +239,7 @@ def running_loadflow(
                 "voltage_kv": bus.GetAttribute("m:Ul"),
                 "angle_deg": bus.GetAttribute("m:phiu"),
             })
-        
+
         print(f"[INFO]: Collecting generator loadflow data...")
         gens = app.GetCalcRelevantObjects("*.ElmSym")
         for gen in gens:
@@ -293,7 +352,7 @@ def run_dynamic_simulation(
         project = app.ActivateProject(proj_name)
         if project is None:
             raise RuntimeError(f"Cannot activate project '{proj_name}'")
-        
+
         print(f"[INFO]: Activating study cases project...")
         study_case = app.GetActiveStudyCase()
         if study_case is None:
@@ -451,124 +510,3 @@ def run_dynamic_simulation(
         error_details = traceback.format_exc()
         error_message = f"dynamic Error happened: {str(e)}\n\nDetails:\n{error_details}"
         return False, error_message, "-"
-
-def check_all_study_case_event(
-    digsilent_path,
-    proj_name,
-):
-    """
-    Check and retrieve all events from each study case in PowerFactory project.
-    
-    Args:
-        digsilent_path: Path to PowerFactory installation
-        proj_name: Name of the project to activate
-    
-    Returns:
-        tuple: (success_status, events_dict, message)
-    """
-    import sys
-    import os
-
-    try:
-        # Validate PowerFactory path
-        if not os.path.exists(digsilent_path):
-            raise OSError(f"{digsilent_path} does not exist")
-
-        print(f"[INFO]: Activating project...")
-        sys.path.append(rf"{digsilent_path}")
-        import powerfactory as pf
-
-        # Get PowerFactory application
-        app = pf.GetApplication()
-        if app is None:
-            raise RuntimeError("Cannot get PowerFactory application.")
-
-        app.ClearOutputWindow()
-        app.ResetCalculation()
-        print(f"[DONE]: Success activating project")
-
-        # Activate project
-        project = app.ActivateProject(proj_name)
-        if project is None:
-            raise RuntimeError(f"Cannot activate project '{proj_name}'")
-        
-        events_cases = {}
-        
-        print(f"[INFO]: Getting study cases and their events...")
-        print("=" * 80)
-        
-        study_cases = app.GetProjectFolder('study').GetContents('*.IntCase')
-        
-        if not study_cases:
-            print("[WARNING]: No study cases found")
-            return True, events_cases, "No study cases found in project"
-        
-        for case in study_cases:
-            case_name = case.loc_name
-            print(f"\n[CASE]: {case_name}")
-            print("-" * 80)
-            
-            # Aktivasi study case
-            case.Activate()
-            
-            # Mendapatkan event folder dari study case yang aktif
-            event_folder = app.GetFromStudyCase('IntEvt')
-            
-            if event_folder is None:
-                print(f"  [WARNING]: No event folder found for case '{case_name}'")
-                events_cases[case_name] = []
-                continue
-            
-            # Mendapatkan semua events (*.EvtSwitch, *.EvtShc, *.EvtLod, dll)
-            # Atau gunakan '*' untuk mendapatkan semua tipe event
-            all_events = event_folder.GetContents()
-            
-            if not all_events:
-                print(f"  [INFO]: No events found in case '{case_name}'")
-                events_cases[case_name] = []
-                continue
-            
-            # Menyimpan informasi event
-            event_list = []
-            print(f"  [INFO]: Found {len(all_events)} event(s):")
-            
-            for idx, event in enumerate(all_events, 1):
-                event_info = {
-                    'name': event.loc_name,
-                    'class': event.GetClassName(),
-                    'full_path': event.GetFullName(),
-                    'object': event
-                }
-                
-                if hasattr(event, 'p_target'):
-                    event_info['target'] = event.p_target.loc_name if event.p_target else 'None'
-                if hasattr(event, 'time'):
-                    event_info['time'] = event.time
-                
-                event_list.append(event_info)
-                
-                print(f"{idx}. {event.loc_name} ({event.GetClassName()})")
-                if 'target' in event_info:
-                    print(f"Target: {event_info['target']}")
-                if 'time' in event_info:
-                    print(f"Time: {event_info['time']} s")
-            
-            events_cases[case_name] = event_list
-        
-        print("\n" + "=" * 80)
-        print(f"[DONE]: Successfully retrieved events from {len(events_cases)} study case(s)")
-        
-        # Summary
-        print("\n[SUMMARY]:")
-        for case_name, events in events_cases.items():
-            print(f"  - {case_name}: {len(events)} event(s)")
-        
-        return True, events_cases, f"Successfully retrieved events from {len(events_cases)} case(s)"
-
-    except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        error_message = f"Error occurred: {str(e)}\n\nDetails:\n{error_details}"
-        print(error_message)
-        return False, {}, error_message
-

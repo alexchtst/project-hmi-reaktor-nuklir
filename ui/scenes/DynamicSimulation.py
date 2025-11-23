@@ -23,6 +23,7 @@ class DynamicActifityScreenScene(QWidget):
     project_name_signal = pyqtSignal(str)
     ds_pf_path_signal = pyqtSignal(str)
     caseses_signal = pyqtSignal(list)
+    casesesevent_signal = pyqtSignal(dict)
     resultisready = pyqtSignal()
 
     def __init__(self):
@@ -36,6 +37,8 @@ class DynamicActifityScreenScene(QWidget):
         self.__projectname = None
         self.__caseses = []
         self.__selected_case = None
+        
+        self.__eventcases = None
 
         self.tabs = QTabWidget()
         # tab running and general info
@@ -109,6 +112,7 @@ class DynamicActifityScreenScene(QWidget):
         self.project_name_signal.connect(self.on_listen_projname)
         self.ds_pf_path_signal.connect(self.on_listen_df_path)
         self.caseses_signal.connect(self.on_listen_casses)
+        self.casesesevent_signal.connect(self.on_listen_cassesevent)
 
         self.deactivate_result_tabs()
         self.resultisready.connect(self.on_israady_change)
@@ -228,6 +232,9 @@ class DynamicActifityScreenScene(QWidget):
         self.__caseses = value
         self.cases_combo_box.clear()
         self.cases_combo_box.addItems(self.__caseses)
+    
+    def on_listen_cassesevent(self, value):
+        self.__eventcases = value
 
     def on_update_cases(self, value):
         self.__selected_case = value
@@ -242,21 +249,18 @@ class DynamicActifityScreenScene(QWidget):
 
         self.resultisready.emit()
 
-    def on_israady_change(self):
-        pass
-
     def clicked_history_handler(self):
         self.loadhistory = DynamicHistoryDialogUI()
         self.loadhistory.datareading.connect(self.on_data_received)
         self.loadhistory.show()
 
     def clicked_dynamic_configuration(self):
-        # self.dynamiconfig = RunDynamicUI(
-        #     ds_pf_pathfile=self.__df_path,
-        #     case_name=self.__selected_case,
-        #     proj_name=self.__projectname
-        # )
-        self.dynamiconfig = RunDynamicConfigUI()
+        self.dynamiconfig = RunDynamicConfigUI(
+            ds_pf_pathfile=self.__df_path,
+            proj_name=self.__projectname,
+            case_name=self.__selected_case,
+            event_cases=self.__eventcases
+        )
         self.dynamiconfig.show()
 
     def on_israady_change(self):

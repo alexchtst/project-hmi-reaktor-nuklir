@@ -41,7 +41,7 @@ class DigsilentWorker(QObject):
             import subprocess
             with subprocess.Popen(
                 [
-                    "python", "worker_connectandsetup.py", # belom ada [TODO]: BUAT NANTI LEX
+                    "python", "worker_connectandsetup.py",
                     "--digsilent_path", dgpath,
                     "--project_name", prjname,
                 ],
@@ -50,25 +50,48 @@ class DigsilentWorker(QObject):
                 text=True,
                 bufsize=1
             ) as prs:
-                # print("Running digsilent worker line 54")
                 for line in iter(prs.stdout.readline, ''):
+                    
                     if not line or self._running == False:
                         break
                     
                     if "FINISH" in line:
                         line_data = line.strip().split("|")
+                        
+                        import base64
+                        import json
+                        events_data = {}
+                        try:
+                            if len(line_data) > 5 and line_data[5]:
+                                events_json = base64.b64decode(line_data[5]).decode('utf-8')
+                                events_data = json.loads(events_json)
+                                
+                        except Exception as e:
+                            print(f"[WARNING]: Gagal decode events data: {str(e)}")
+                        
                         self.finishpayload.emit({
                             "status": line_data[1],
-                            "msg": line_data[2],
-                            "data": line_data[3].split(","),
-                            "type": line_data[4]
+                            "type": line_data[2],
+                            "msg": line_data[3],
+                            "data": line_data[4].split(",") if line_data[4] else [],
+                            "events": events_data,
+                        })
+                        break
+                    
+                    if "TERMINATE" in line:
+                        line_data = line.strip().split("|")
+                        self.finishpayload.emit({
+                            "status": line_data[1],
+                            "type": line_data[2],
+                            "msg": line_data[3],
+                            "data": [],
+                            "events": {},  # Field baru untuk data events (kosong saat error)
                         })
                         break
                     
                     self.message.emit(line.strip())
                     
                 prs.wait()
-                # prs.kill()
         except Exception as e:
             err_msg = f"Error happened: {str(e)}"
             print(err_msg)
@@ -76,7 +99,8 @@ class DigsilentWorker(QObject):
         
         finally:
             self.finished.emit()
-
+    
+    
     @pyqtSlot()
     def work_runloadflow(self):
         try:
@@ -215,43 +239,7 @@ class DigsilentWorker(QObject):
                     # print(line.strip(), flush=True)
                     
                 prs.wait()
-        except Exception as e:
-            err_msg = f"Error happened: {str(e)}"
-            print(err_msg)
-            self.message.emit(err_msg)
-            self.finishpayload.emit({
-                "status": "ERROR",
-                "msg": err_msg,
-                "path": "...",
-                "type": "DYNAMIC",
-            })
-            self.finished.emit()
-
-        finally:
-            self.finished.emit()
-
-    @pyqtSlot()
-    def work_detect_case_events(self):
-        try:
-            dgpath = self.__digsilent_path
-            prjname = self.__proj_name
-            if dgpath == None or prjname == None:
-                raise TypeError("invalid input")
-            
-            import subprocess
-            with subprocess.Popen(
-                [
-                    "python", "worker_dynamic.py",
-                    "--digsilent_path", dgpath,
-                    "--project_name", prjname,
-                ],
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                bufsize=1,
-                text=True
                 
-            ) as prs :
-                pass
         except Exception as e:
             err_msg = f"Error happened: {str(e)}"
             print(err_msg)
@@ -263,8 +251,9 @@ class DigsilentWorker(QObject):
                 "type": "DYNAMIC",
             })
             self.finished.emit()
+
         finally:
             self.finished.emit()
-    
+
     def stop(self):
         self._running = False

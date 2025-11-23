@@ -44,6 +44,7 @@ class PLTNOptionScreenScene(QWidget):
     digsilentpathsignal = pyqtSignal(str)
     
     casessignal = pyqtSignal(list)
+    casseseventsignal = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()
@@ -160,4 +161,5 @@ class PLTNOptionScreenScene(QWidget):
     def on_finished_with_payload(self, value):
         self.validation_status[self.current_pltn_system] = True
         self.casessignal.emit(value["data"])
+        self.casseseventsignal.emit(value["events"])
         self.btn.setEnabled(self.validation_status[self.current_pltn_system])

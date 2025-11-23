@@ -44,7 +44,7 @@ class ConnectSetupProcessDialogUI(QDialog):
         self.progress_bar = ProgressLoaderBar(minimum=0, maximum=0, objectName="BlueProgressBar", textVisible=False)
         self.progress_info_layout.addWidget(self.progress_bar)
         
-        self.cancel_button = QPushButton("Cancle")
+        self.cancel_button = QPushButton("Batalkan")
         self.progress_info_layout.addWidget(self.cancel_button)
         self.cancel_button.clicked.connect(self.cancel_operation)
         
@@ -98,6 +98,7 @@ class ConnectSetupProcessDialogUI(QDialog):
     def on_finished_event(self):
         self.finished.emit()
         self.progress_bar.hide()
+        self.cancel_button.setText("Tutup")
     
     def on_finished_success_event(self, value):
         self.finsihedpayload.emit(value)
