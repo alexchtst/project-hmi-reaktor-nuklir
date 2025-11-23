@@ -7,7 +7,6 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from ui.CasescardUI import CaseCardUI
 from ui.DynamicHistoryDialogUI import DynamicHistoryDialogUI
-from ui.RunDynamicTemplateUI import RunDynamicUI
 from ui.RunDynamicConfigUI import RunDynamicConfigUI
 from ui.GraphicalUI import GraphicalVisualization
 from ui.CasescardUI import CaseCardUI

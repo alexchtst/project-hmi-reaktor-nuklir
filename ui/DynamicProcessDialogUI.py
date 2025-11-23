@@ -3,8 +3,7 @@ from PyQt5.QtWidgets import (
     QLabel
 )
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSignal, QThread
-import time
+from PyQt5.QtCore import pyqtSignal, QThread, Qt
 from ui.ProgressBarUI import ProgressLoaderBar
 from module.digsilentpf_worker import DigsilentWorker
 
@@ -19,10 +18,8 @@ class DynamicProcessDialogUI(QDialog):
         case_name: str,
         start_sim=None,
         stop_sim=None,
-        sim_step=None,
-        start_fault=None,
-        stop_fault=None,
-        fault_type=None,
+        time_step = None,
+        events_config=None
     ):
         super().__init__()
         
@@ -31,15 +28,16 @@ class DynamicProcessDialogUI(QDialog):
         self.setFixedWidth(480)
         self.setFixedHeight(120)
         
+        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowFlag(Qt.WindowCloseButtonHint, False)
+        
         self.__digsilent_path = ds_pf_pathfle
         self.__proj_name = proj_name
         self.__case_name = case_name
         self.__start_sim = start_sim
         self.__stop_sim = stop_sim
-        self.__sim_step = sim_step
-        self.__start_fault = start_fault
-        self.__stop_fault = stop_fault
-        self.__fault_type = fault_type
+        self.__time_step = time_step
+        self.__events_config = events_config 
         
         self.wrapper_layout = QVBoxLayout()
         self.content_label = QLabel("Running Dynamic Simulation")
@@ -70,9 +68,9 @@ class DynamicProcessDialogUI(QDialog):
         pass
     
     def on_messages_from_progress(self, value):
-        print(value)
-        pass
-    
+        if value:
+            self.loginfo.setText(value)
+            
     def cancel_operation(self):
         self.stop_task()
         self.close()
@@ -83,15 +81,9 @@ class DynamicProcessDialogUI(QDialog):
             digsilent_path=self.__digsilent_path,
             proj_name=self.__proj_name,
             case_name=self.__case_name,
-            start_sim=self.__start_sim,
-            stop_sim=self.__stop_sim,
-            sim_step=self.__sim_step,
-            start_fault=self.__start_fault,
-            stop_fault=self.__stop_fault,
-            fault_type=self.__fault_type,
+            events_config=self.__events_config
         )
         self.worker.moveToThread(self.worker_thread)
-
         self.worker_thread.started.connect(self.worker.work_workdynamic)
         self.worker.message.connect(self.update_progress_log)
         self.worker.finished.connect(self.on_finished_event)
@@ -111,4 +103,5 @@ class DynamicProcessDialogUI(QDialog):
         self.progress_bar.hide()
     
     def update_progress_log(self, value):
+        print(value)
         self.loginfo.setText(value)

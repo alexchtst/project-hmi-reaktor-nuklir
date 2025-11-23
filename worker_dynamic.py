@@ -1,5 +1,7 @@
 # worker_dynamic.py
 import argparse
+import json
+import base64
 from module.digsilentpf_module import run_dynamic_simulation
 import os
 
@@ -8,30 +10,35 @@ if __name__ == "__main__":
     parser.add_argument("--digsilent_path", required=True)
     parser.add_argument("--project_name", required=True)
     parser.add_argument("--case_name", required=True)
-    parser.add_argument("--start_time", type=float, default=-0.1)
-    parser.add_argument("--stop_time", type=float, default=5)
-    parser.add_argument("--start_fault", type=float, default=0)
-    parser.add_argument("--clear_fault", type=float, default=0.23)
-    parser.add_argument("--fault_element_name", default="Line 02 - 03")
-    parser.add_argument("--fault_element_type", default="ElmLne")
-    parser.add_argument("--fault_type", type=int, default=0)
+    parser.add_argument("--start_time", type=float, required=True)
+    parser.add_argument("--stop_time", type=float, required=True)
+    parser.add_argument("--step_size", type=float, required=True)
+    parser.add_argument("--events_config", required=False, default=None)
+    parser.add_argument("--output_dir", required=False, default="../data")
+    
     args = parser.parse_args()
 
-    success, message, filepath = run_dynamic_simulation(
+    # Decode events_config from base64 JSON
+    events_config = None
+    if args.events_config:
+        try:
+            events_json = base64.b64decode(args.events_config).decode('utf-8')
+            events_config = json.loads(events_json)
+        except Exception as e:
+            print(f"[WARNING]: Failed to decode events_config: {str(e)}")
+
+    success, message, result_path = run_dynamic_simulation(
         digsilent_path=args.digsilent_path,
         proj_name=args.project_name,
         case_name=args.case_name,
         start_time_simulation=args.start_time,
         stop_time_simulation=args.stop_time,
-        start_fault=args.start_fault,
-        clear_fault=args.clear_fault,
-        fault_element_name=args.fault_element_name,
-        fault_element_type=args.fault_element_type,
-        fault_type=args.fault_type,
-        output_dir = os.path.join(os.getcwd(), "data")
+        step_size=args.step_size,
+        events_config=events_config,
+        output_dir=os.path.join(os.getcwd(), "data")
     )
 
     if success:
-        print(f"FINISH|SUCCESS|{message}|{filepath}|DYNAMIC")
+        print(f"FINISH|SUCCESS|DYNAMICSIMULATION|{message}|{result_path}")
     else:
-        print(f"FINISH|ERROR|{message}|..|DYNAMIC")
+        print(f"TERMINATE|ERROR|DYNAMICSIMULATION|{message}|")

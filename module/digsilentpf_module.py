@@ -157,7 +157,6 @@ def safe_getattr(obj, attr, default=0):
     except:
         return default
 
-
 def running_loadflow(
     digsilent_path,
     proj_name,
@@ -308,19 +307,14 @@ def running_loadflow(
 # "ElmLne": ["m:P:bus1", "m:P:bus2", "m:Q:bus1", "m:Q:bus2", "m:I:bus1"],
 # "ElmTr2": ["m:P:bushv", "m:P:buslv", "c:loading"],
 
-
 def run_dynamic_simulation(
     digsilent_path,
     proj_name,
     case_name="Study Case",
     start_time_simulation=0,
     stop_time_simulation=100,
-    start_fault=None,  # None = no fault
-    clear_fault=None,
-    fault_element_name=None,
-    fault_element_type="ElmLne",
-    fault_type=0,  # 0=3-phase short circuit
-    step_size=1,
+    step_size=0.01,
+    events_config=None,
     properties_data_name={
         "ElmSym": ["m:P:bus1", "m:Q:bus1", "n:fehz:bus1"],
         "ElmTerm": ["m:fehz"],
@@ -353,7 +347,7 @@ def run_dynamic_simulation(
         if project is None:
             raise RuntimeError(f"Cannot activate project '{proj_name}'")
 
-        print(f"[INFO]: Activating study cases project...")
+        print(f"[INFO]: Activating study case...")
         study_case = app.GetActiveStudyCase()
         if study_case is None:
             study_cases = app.GetProjectFolder(
@@ -367,9 +361,9 @@ def run_dynamic_simulation(
             if study_case is None:
                 raise RuntimeError(
                     f"Cannot find or activate study case '{case_name}'")
-        print(f"[DONE]: Success getting all study cases project")
+        print(f"[DONE]: Success activating study case")
 
-        print(f"[INFO]: Running intial condition...")
+        print(f"[INFO]: Setting up initial condition...")
         comInc = app.GetFromStudyCase("ComInc")
         comSim = app.GetFromStudyCase("ComSim")
 
@@ -377,64 +371,137 @@ def run_dynamic_simulation(
             raise RuntimeError(
                 "Cannot get simulation commands (ComInc or ComSim)")
 
-        comInc.iopt_sim = "rms"      # RMS simulation
-        comInc.iopt_show = 0         # No graphical output during simulation
-        comInc.iopt_adapt = 0        # Fixed step size
-        comInc.dtgrd = 1     # Step size
-        comInc.start = start_time_simulation  # Start time
-
-        comSim.tstop = stop_time_simulation   # Stop time
+        comInc.iopt_sim = "rms"
+        comInc.iopt_show = 0
+        comInc.iopt_adapt = 0
+        comInc.dtgrd = 30 # Integration time step
+        comInc.dtout = step_size
+        
+        comInc.start = start_time_simulation
+        comSim.tstop = stop_time_simulation
 
         comInc.Execute()
         elmRes = comInc.p_resvar
-        print(f"[DONE]: Success running intial condition")
+        print(f"[DONE]: Success running initial condition")
 
         if elmRes is None:
             raise RuntimeError("Cannot get result variable object")
 
-        print(f"[INFO]: Setup fault event (shc)")
-        faultFolder = app.GetFromStudyCase("Simulation Events/Fault.IntEvt")
-        if faultFolder is not None:
-            cont = faultFolder.GetContents()
-            for obj in cont:
-                obj.Delete()
+        # Configure events berdasarkan events_config dari UI
+        print(f"[INFO]: Configuring events...")
+        event_folder = app.GetFromStudyCase('IntEvt')
 
-        fault_configured = False
-        if start_fault is not None and fault_element_name is not None:
+        if event_folder is None:
+            print("[WARNING]: No event folder found, creating one...")
+            event_folder = app.GetFromStudyCase(
+                '.').CreateObject('IntEvt', 'Simulation Events')
 
-            fault_element = None
-            elements = app.GetCalcRelevantObjects(fault_element_type)
-            for elem in elements:
-                if fault_element_name in elem.loc_name:
-                    fault_element = elem
-                    break
+        # Get all existing events in PowerFactory
+        all_pf_events = event_folder.GetContents()
 
-            if fault_element is None:
-                pass
-            else:
-                if fault_element_type == "ElmLne":
-                    if hasattr(fault_element, 'ishclne'):
-                        if fault_element.ishclne == 0:
-                            fault_element.ishclne = 1
+        events_configured = 0
+        events_disabled = 0
 
-                event_fault = faultFolder.CreateObject(
-                    "EvtShc", f"Fault_{fault_element.loc_name}")
-                event_fault.p_target = fault_element
-                event_fault.time = start_fault
-                event_fault.i_shc = fault_type
+        if events_config:
+            for event_key, event_cfg in events_config.items():
+                event_data = event_cfg.get('event_data', {})
+                in_service = event_cfg.get('in_service', True)
+                configured = event_cfg.get('configured', False)
+                config = event_cfg.get('config', {})
 
-                if clear_fault is not None:
-                    event_clear = faultFolder.CreateObject(
-                        "EvtShc", f"Clear_{fault_element.loc_name}")
-                    event_clear.p_target = fault_element
-                    event_clear.time = clear_fault
-                    event_clear.i_shc = 4
+                event_name = event_data.get('name')
+                target_name = event_data.get('target')
+                event_class = event_data.get('class', '')
 
-                fault_configured = True
-        else:
-            pass
-        print(f"[DONE]: Success settingup fault event (shc)")
+                # Find corresponding PowerFactory event object
+                pf_event = None
+                for evt in all_pf_events:
+                    if evt.loc_name == event_name:
+                        pf_event = evt
+                        break
 
+                if pf_event is None:
+                    print(
+                        f"[WARNING]: Event '{event_name}' not found in PowerFactory, skipping...")
+                    continue
+
+                # Set in service status
+                if hasattr(pf_event, 'outserv'):
+                    pf_event.outserv = 0 if in_service else 1
+                elif hasattr(pf_event, 'i_outserv'):
+                    pf_event.i_outserv = 0 if in_service else 1
+
+                if not in_service:
+                    events_disabled += 1
+                    print(
+                        f"[INFO]: Event '{event_name}' set to OUT OF SERVICE")
+                    continue
+
+                # Apply custom configuration if exists
+                if configured and config:
+                    if 'Shc' in event_class:  # Short Circuit Event
+                        # Update fault timing
+                        if 'start_fault' in config:
+                            pf_event.time = config['start_fault']
+
+                        if 'fault_type' in config and hasattr(pf_event, 'i_shc'):
+                            pf_event.i_shc = config['fault_type']
+
+                        print(f"[INFO]: Configured fault event '{event_name}': "
+                              f"start={config.get('start_fault')}s, "
+                              f"clear={config.get('clear_fault')}s, "
+                              f"type={config.get('fault_type')}")
+
+                        # Create clear fault event if specified
+                        if 'clear_fault' in config:
+                            clear_event_name = f"Clear_{event_name}"
+                            # Check if clear event already exists
+                            clear_event = None
+                            for evt in all_pf_events:
+                                if evt.loc_name == clear_event_name:
+                                    clear_event = evt
+                                    break
+
+                            if clear_event is None:
+                                # Create new clear event
+                                clear_event = event_folder.CreateObject(
+                                    'EvtShc', clear_event_name)
+                                clear_event.p_target = pf_event.p_target
+
+                            clear_event.time = config['clear_fault']
+                            clear_event.i_shc = 4  # Clear fault
+                            clear_event.outserv = 0
+                            print(
+                                f"[INFO]: Clear fault event created/updated at {config['clear_fault']}s")
+
+                    elif 'Switch' in event_class:  # Switch Event
+                        if 'time' in config:
+                            pf_event.time = config['time']
+
+                        if 'switch_state' in config and hasattr(pf_event, 'i_switch'):
+                            pf_event.i_switch = config['switch_state']
+
+                        print(f"[INFO]: Configured switch event '{event_name}': "
+                              f"time={config.get('time')}s, "
+                              f"state={config.get('switch_state')}")
+
+                    else:  # Generic event
+                        if 'time' in config:
+                            pf_event.time = config['time']
+
+                        print(
+                            f"[INFO]: Configured event '{event_name}': time={config.get('time')}s")
+
+                    events_configured += 1
+                else:
+                    print(
+                        f"[INFO]: Event '{event_name}' using default configuration")
+
+        print(f"[DONE]: Events configuration complete. "
+              f"Configured: {events_configured}, Disabled: {events_disabled}")
+
+        # Add variables to result object
+        print(f"[INFO]: Adding monitoring variables...")
         total_vars = 0
         for element_type, variables in properties_data_name.items():
             elements = app.GetCalcRelevantObjects(element_type)
@@ -447,11 +514,14 @@ def run_dynamic_simulation(
                     except Exception as e:
                         pass
 
+        print(f"[INFO]: Added {total_vars} monitoring variables")
+
+        # Execute initial condition again after event configuration
         app.EchoOff()
         comInc.Execute()
         app.EchoOn()
 
-        print(f"[INFO]: Running dynamic simulation")
+        print(f"[INFO]: Running dynamic simulation...")
         result = comSim.Execute()
 
         if result != 0:
@@ -462,16 +532,16 @@ def run_dynamic_simulation(
         nCols = elmRes.GetNumberOfColumns()
         nRows = elmRes.GetNumberOfRows()
         print(f"[DONE]: Success running dynamic simulation")
+        print(f"[INFO]: Results - Columns: {nCols}, Rows: {nRows}")
 
         from datetime import datetime
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        print(f"[INFO]: Collecting all running dynamic simulation data")
+        print(f"[INFO]: Collecting simulation data...")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        sim_type = "with_fault" if fault_configured else "no_fault"
         datapath_result = os.path.join(
-            output_dir, f"drs_{start_fault}_{clear_fault}_{sim_type}_{timestamp}.csv")
+            output_dir, f"dynamic_sim_{case_name}_{timestamp}.csv")
 
         with open(datapath_result, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
@@ -500,7 +570,11 @@ def run_dynamic_simulation(
 
                     writer.writerow(dataRow)
                     rows_written += 1
-        print(f"[DONE]: Success collecting all running dynamic simulation data")
+
+        print(f"[DONE]: Success collecting simulation data")
+        print(f"[INFO]: Data saved to: {datapath_result}")
+        print(f"[INFO]: Total rows written: {rows_written}")
+
         elmRes.Release()
 
         return True, f"Success to run dynamic simulation. Rows written: {rows_written}", datapath_result
@@ -508,5 +582,6 @@ def run_dynamic_simulation(
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
-        error_message = f"dynamic Error happened: {str(e)}\n\nDetails:\n{error_details}"
+        error_message = f"Dynamic simulation error: {str(e)}\n\nDetails:\n{error_details}"
+        print(error_message)
         return False, error_message, "-"

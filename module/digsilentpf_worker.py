@@ -13,9 +13,7 @@ class DigsilentWorker(QObject):
         start_sim=None,
         stop_sim=None,
         sim_step=None,
-        start_fault=None,
-        stop_fault=None,
-        fault_type=None,
+        events_config=None
     ):
         super().__init__()
         self.__digsilent_path = digsilent_path
@@ -24,9 +22,7 @@ class DigsilentWorker(QObject):
         self.__start_sim = start_sim
         self.__stop_sim = stop_sim
         self.__sim_step = sim_step
-        self.__start_fault = start_fault
-        self.__stop_fault = stop_fault
-        self.__fault_type = fault_type
+        self.__events_config = events_config
         self._running = True
 
     @pyqtSlot()
@@ -50,8 +46,7 @@ class DigsilentWorker(QObject):
                 text=True,
                 bufsize=1
             ) as prs:
-                for line in iter(prs.stdout.readline, ''):
-                    
+                for line in iter(prs.stdout.readline, ''):                    
                     if not line or self._running == False:
                         break
                     
@@ -85,7 +80,7 @@ class DigsilentWorker(QObject):
                             "type": line_data[2],
                             "msg": line_data[3],
                             "data": [],
-                            "events": {},  # Field baru untuk data events (kosong saat error)
+                            "events": {},
                         })
                         break
                     
@@ -158,100 +153,94 @@ class DigsilentWorker(QObject):
 
     @pyqtSlot()
     def work_workdynamic(self):
+        """Run dynamic simulation menggunakan subprocess"""
         try:
-            dgpath = self.__digsilent_path
-            prjname = self.__proj_name
-            casename = self.__case_name
-            start_sim = self.__start_sim
-            stop_sim = self.__stop_sim
-            sim_step = self.__sim_step
-            start_fault = self.__start_fault
-            stop_fault = self.__stop_fault
-            fault_type = self.__fault_type
-
-            if dgpath == None or prjname == None or casename == None:
-                raise TypeError("invalid input")
-
-            if (
-                start_fault == None or 
-                start_sim == None or 
-                stop_sim == None or 
-                stop_fault == None
-            ):
-                print(
-                    start_fault , stop_fault ,
-                    stop_fault , stop_sim ,
-                    start_sim , stop_sim ,
-                    start_sim , start_fault
-                )
-                raise TypeError("invalid input time none check")
-
-            if (
-                start_fault > stop_fault or
-                stop_fault > stop_sim or
-                start_sim > stop_sim or
-                start_sim > start_fault
-            ):
-                print(
-                    start_fault , stop_fault ,
-                    stop_fault , stop_sim ,
-                    start_sim , stop_sim ,
-                    start_sim , start_fault
-                )
-                raise TypeError("invalid input time less")
-
+            sim_config = self.__events_config
+            digsilent_path = sim_config.get('digsilent_path')
+            proj_name = sim_config.get('proj_name')
+            case_name = sim_config.get('case_name')
+            start_time = sim_config.get('start_time_simulation')
+            stop_time = sim_config.get('stop_time_simulation')
+            step_size = sim_config.get('step_size')
+            events_config = sim_config.get('events_config', {})
+            
+            # Convert events_config to JSON and encode to base64
+            import json
+            import base64
+            
+            # Clean events_config - remove object references
+            clean_events_config = {}
+            for key, value in events_config.items():
+                clean_events_config[key] = {
+                    'event_data': {
+                        'name': value['event_data'].get('name'),
+                        'class': value['event_data'].get('class'),
+                        'target': value['event_data'].get('target'),
+                        'time': value['event_data'].get('time')
+                    },
+                    'in_service': value.get('in_service', True),
+                    'configured': value.get('configured', False),
+                    'config': value.get('config', {})
+                }
+            
+            events_json = json.dumps(clean_events_config, ensure_ascii=False)
+            events_encoded = base64.b64encode(events_json.encode('utf-8')).decode('utf-8')
+            print("line 188")
             import subprocess
             with subprocess.Popen(
                 [
                     "python", "worker_dynamic.py",
-                    "--digsilent_path", dgpath,
-                    "--project_name", prjname,
-                    "--case_name", casename,
-                    "--start_time", str(start_sim),
-                    "--stop_time", str(stop_sim),
-                    "--start_fault", str(start_fault),
-                    "--clear_fault", str(stop_fault),
+                    "--digsilent_path", digsilent_path,
+                    "--project_name", proj_name,
+                    "--case_name", case_name,
+                    "--start_time", str(start_time),
+                    "--stop_time", str(stop_time),
+                    "--step_size", str(step_size),
+                    "--events_config", events_encoded,
+                    "--output_dir", "../data"
                 ],
-                stderr=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                bufsize=1,
-                text=True
-                
-            ) as prs :
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1
+            ) as prs:
                 for line in iter(prs.stdout.readline, ''):
                     print(line.strip(), flush=True)
-                    if not line:
+                    
+                    if not line or self._running == False:
                         break
                     
                     if "FINISH" in line:
                         line_data = line.strip().split("|")
-                        print(line_data)
                         self.finishpayload.emit({
                             "status": line_data[1],
-                            "msg": line_data[2],
-                            "path": line_data[3],
-                            "type": line_data[4],
+                            "type": line_data[2],
+                            "msg": line_data[3],
+                            "data": line_data[4] if len(line_data) > 4 else "",
                         })
+                        self.finished.emit()
                         break
-
+                    
+                    if "TERMINATE" in line:
+                        line_data = line.strip().split("|")
+                        self.finishpayload.emit({
+                            "status": line_data[1],
+                            "type": line_data[2],
+                            "msg": line_data[3],
+                            "data": "",
+                        })
+                        self.finished.emit()
+                        break
+                    
                     self.message.emit(line.strip())
                     
-                    # print(line.strip(), flush=True)
-                    
                 prs.wait()
-                
         except Exception as e:
             err_msg = f"Error happened: {str(e)}"
             print(err_msg)
             self.message.emit(err_msg)
-            self.finishpayload.emit({
-                "status": "ERROR",
-                "msg": err_msg,
-                "path": "...",
-                "type": "DYNAMIC",
-            })
             self.finished.emit()
-
+        
         finally:
             self.finished.emit()
 

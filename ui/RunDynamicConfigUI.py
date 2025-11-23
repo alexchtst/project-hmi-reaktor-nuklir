@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt
 from ui.UIStyle import FINDPATH_BUTTON_STYLESHEET
-
+from ui.DynamicProcessDialogUI import DynamicProcessDialogUI
 
 class EventConfigDialog(QDialog):
     """Dialog untuk konfigurasi event (fault atau switch)"""
@@ -498,8 +498,7 @@ class RunDynamicConfigUI(QDialog):
 
         # Validasi
         if stop_time <= start_time:
-            QMessageBox.warning(self, "Invalid Configuration",
-                                "Stop time must be greater than start time!")
+            QMessageBox.warning(self, "Invalid Configuration", "Stop time must be greater than start time!")
             return
 
         # Prepare simulation config
@@ -512,22 +511,11 @@ class RunDynamicConfigUI(QDialog):
             'step_size': time_step,
             'events_config': self.dynamic_config
         }
-
-        # Emit signal
-        self.simulation_started.emit(sim_config)
-
-        # Count configured events
-        configured_count = sum(
-            1 for cfg in self.dynamic_config.values() if cfg['configured'])
-        in_service_count = sum(
-            1 for cfg in self.dynamic_config.values() if cfg['in_service'])
-
-        QMessageBox.information(self, "Simulation Started",
-                                f"Dynamic simulation configured with:\n"
-                                f"- Total Events: {len(self.dynamic_config)}\n"
-                                f"- In Service: {in_service_count}\n"
-                                f"- Custom Configured: {configured_count}\n"
-                                f"- Time: {start_time}s to {stop_time}s\n"
-                                f"- Step: {time_step}s")
-
+        self.processdialog = DynamicProcessDialogUI(
+            ds_pf_pathfle=self.__df_path,
+            proj_name=self.__proj_name,
+            case_name=self.__case_name,
+            events_config=sim_config,
+        )
+        self.processdialog.show()
         self.accept()
