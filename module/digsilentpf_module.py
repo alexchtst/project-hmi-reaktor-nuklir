@@ -451,3 +451,124 @@ def run_dynamic_simulation(
         error_details = traceback.format_exc()
         error_message = f"dynamic Error happened: {str(e)}\n\nDetails:\n{error_details}"
         return False, error_message, "-"
+
+def check_all_study_case_event(
+    digsilent_path,
+    proj_name,
+):
+    """
+    Check and retrieve all events from each study case in PowerFactory project.
+    
+    Args:
+        digsilent_path: Path to PowerFactory installation
+        proj_name: Name of the project to activate
+    
+    Returns:
+        tuple: (success_status, events_dict, message)
+    """
+    import sys
+    import os
+
+    try:
+        # Validate PowerFactory path
+        if not os.path.exists(digsilent_path):
+            raise OSError(f"{digsilent_path} does not exist")
+
+        print(f"[INFO]: Activating project...")
+        sys.path.append(rf"{digsilent_path}")
+        import powerfactory as pf
+
+        # Get PowerFactory application
+        app = pf.GetApplication()
+        if app is None:
+            raise RuntimeError("Cannot get PowerFactory application.")
+
+        app.ClearOutputWindow()
+        app.ResetCalculation()
+        print(f"[DONE]: Success activating project")
+
+        # Activate project
+        project = app.ActivateProject(proj_name)
+        if project is None:
+            raise RuntimeError(f"Cannot activate project '{proj_name}'")
+        
+        events_cases = {}
+        
+        print(f"[INFO]: Getting study cases and their events...")
+        print("=" * 80)
+        
+        study_cases = app.GetProjectFolder('study').GetContents('*.IntCase')
+        
+        if not study_cases:
+            print("[WARNING]: No study cases found")
+            return True, events_cases, "No study cases found in project"
+        
+        for case in study_cases:
+            case_name = case.loc_name
+            print(f"\n[CASE]: {case_name}")
+            print("-" * 80)
+            
+            # Aktivasi study case
+            case.Activate()
+            
+            # Mendapatkan event folder dari study case yang aktif
+            event_folder = app.GetFromStudyCase('IntEvt')
+            
+            if event_folder is None:
+                print(f"  [WARNING]: No event folder found for case '{case_name}'")
+                events_cases[case_name] = []
+                continue
+            
+            # Mendapatkan semua events (*.EvtSwitch, *.EvtShc, *.EvtLod, dll)
+            # Atau gunakan '*' untuk mendapatkan semua tipe event
+            all_events = event_folder.GetContents()
+            
+            if not all_events:
+                print(f"  [INFO]: No events found in case '{case_name}'")
+                events_cases[case_name] = []
+                continue
+            
+            # Menyimpan informasi event
+            event_list = []
+            print(f"  [INFO]: Found {len(all_events)} event(s):")
+            
+            for idx, event in enumerate(all_events, 1):
+                event_info = {
+                    'name': event.loc_name,
+                    'class': event.GetClassName(),
+                    'full_path': event.GetFullName(),
+                    'object': event
+                }
+                
+                if hasattr(event, 'p_target'):
+                    event_info['target'] = event.p_target.loc_name if event.p_target else 'None'
+                if hasattr(event, 'time'):
+                    event_info['time'] = event.time
+                
+                event_list.append(event_info)
+                
+                print(f"{idx}. {event.loc_name} ({event.GetClassName()})")
+                if 'target' in event_info:
+                    print(f"Target: {event_info['target']}")
+                if 'time' in event_info:
+                    print(f"Time: {event_info['time']} s")
+            
+            events_cases[case_name] = event_list
+        
+        print("\n" + "=" * 80)
+        print(f"[DONE]: Successfully retrieved events from {len(events_cases)} study case(s)")
+        
+        # Summary
+        print("\n[SUMMARY]:")
+        for case_name, events in events_cases.items():
+            print(f"  - {case_name}: {len(events)} event(s)")
+        
+        return True, events_cases, f"Successfully retrieved events from {len(events_cases)} case(s)"
+
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        error_message = f"Error occurred: {str(e)}\n\nDetails:\n{error_details}"
+        print(error_message)
+        return False, {}, error_message
+

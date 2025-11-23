@@ -251,12 +251,12 @@ class DynamicActifityScreenScene(QWidget):
         self.loadhistory.show()
 
     def clicked_dynamic_configuration(self):
-        self.dynamiconfig = RunDynamicUI(
-            ds_pf_pathfile=self.__df_path,
-            case_name=self.__selected_case,
-            proj_name=self.__projectname
-        )
-        # self.dynamiconfig = RunDynamicConfigUI()
+        # self.dynamiconfig = RunDynamicUI(
+        #     ds_pf_pathfile=self.__df_path,
+        #     case_name=self.__selected_case,
+        #     proj_name=self.__projectname
+        # )
+        self.dynamiconfig = RunDynamicConfigUI()
         self.dynamiconfig.show()
 
     def on_israady_change(self):

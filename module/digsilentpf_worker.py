@@ -212,7 +212,7 @@ class DigsilentWorker(QObject):
 
                     self.message.emit(line.strip())
                     
-                    print(line.strip(), flush=True)
+                    # print(line.strip(), flush=True)
                     
                 prs.wait()
         except Exception as e:
@@ -230,5 +230,41 @@ class DigsilentWorker(QObject):
         finally:
             self.finished.emit()
 
+    @pyqtSlot()
+    def work_detect_case_events(self):
+        try:
+            dgpath = self.__digsilent_path
+            prjname = self.__proj_name
+            if dgpath == None or prjname == None:
+                raise TypeError("invalid input")
+            
+            import subprocess
+            with subprocess.Popen(
+                [
+                    "python", "worker_dynamic.py",
+                    "--digsilent_path", dgpath,
+                    "--project_name", prjname,
+                ],
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                bufsize=1,
+                text=True
+                
+            ) as prs :
+                pass
+        except Exception as e:
+            err_msg = f"Error happened: {str(e)}"
+            print(err_msg)
+            self.message.emit(err_msg)
+            self.finishpayload.emit({
+                "status": "ERROR",
+                "msg": err_msg,
+                "path": "...",
+                "type": "DYNAMIC",
+            })
+            self.finished.emit()
+        finally:
+            self.finished.emit()
+    
     def stop(self):
         self._running = False
