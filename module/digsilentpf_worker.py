@@ -31,7 +31,6 @@ class DigsilentWorker(QObject):
 
     @pyqtSlot()
     def work_connectsetup(self):
-        print(f"Running connect and setup with {self.__proj_name} and {self.__digsilent_path}")
         try:
             dgpath = self.__digsilent_path
             prjname = self.__proj_name

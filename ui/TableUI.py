@@ -1,2 +1,0 @@
-def tableui():
-    return "tableui"

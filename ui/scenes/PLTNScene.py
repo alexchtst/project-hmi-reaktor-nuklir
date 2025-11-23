@@ -7,7 +7,8 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from ui.PLTNcardUI import PLTNCardUI
 from ui.ConnectSetupProcessDialogUI import ConnectSetupProcessDialogUI
 from ui.UIStyle import (
-    PLTN_SYSTEM_TITLE_STYLESHEET, NAV_BUTTON_STYLESHEET, FINDPATH_BUTTON_STYLESHEET
+    PLTN_SYSTEM_TITLE_STYLESHEET, NAV_BUTTON_STYLESHEET, FINDPATH_BUTTON_STYLESHEET,
+    CASES_COMBO_BOX_STYLESHEET
 )
 
 SYSTEM_PROVIDED = [
@@ -77,6 +78,7 @@ class PLTNOptionScreenScene(QWidget):
                 
         self.pltn_system_combobox = QComboBox()
         self.pltn_system_combobox.addItems(SYSTEM_PROVIDED)
+        self.pltn_system_combobox.setStyleSheet(CASES_COMBO_BOX_STYLESHEET)
         self.pltn_system_combobox.currentTextChanged.connect(self.on_pltn_system_change)
         
         pltn_system_layout.addWidget(self.pltn_system_combobox)

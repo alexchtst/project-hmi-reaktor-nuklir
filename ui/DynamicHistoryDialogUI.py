@@ -6,16 +6,15 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt
 import os
-import json
 from datetime import datetime
 
-class LoadflowHistoryDialogUI(QDialog):
-    datareading = pyqtSignal(dict)
+class DynamicHistoryDialogUI(QDialog):
+    datareading = pyqtSignal(str)
     
     def __init__(self):
         super().__init__()
         
-        self.setWindowTitle("Load Flow History")
+        self.setWindowTitle("Dynamic Simulation History")
         self.setWindowIcon(QIcon(r"C:\Users\Alex\NgodingDulu\project-hmi-nuklir-new\asset\logo-ugm.jpg"))
         self.setFixedWidth(800)
         self.setFixedHeight(500)
@@ -32,7 +31,7 @@ class LoadflowHistoryDialogUI(QDialog):
         layout = QVBoxLayout()
         
         # Label header
-        header_label = QLabel("Load Flow History")
+        header_label = QLabel("Dynamic Results History")
         header_label.setStyleSheet("font-size: 16px; font-weight: bold; padding: 10px;")
         layout.addWidget(header_label)
         
@@ -97,7 +96,7 @@ class LoadflowHistoryDialogUI(QDialog):
                 return
             
             # Get all .json files
-            files = [f for f in os.listdir(self.data_folder) if f.endswith('.json')]
+            files = [f for f in os.listdir(self.data_folder) if f.endswith('.csv')]
             
             if not files:
                 QMessageBox.information(self, "Info", "Tidak ada file history yang ditemukan.")
@@ -152,12 +151,6 @@ class LoadflowHistoryDialogUI(QDialog):
     def on_select_clicked(self):
         sender = self.sender()
         filepath = sender.property("filepath")
-        
-        try:
-            with open(filepath, 'r') as f:
-                data = json.load(f)
-            self.datareading.emit(data)
-            self.accept()
-            
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Error reading file: {str(e)}")
+        print(filepath)
+        self.datareading.emit(filepath)
+        self.accept()

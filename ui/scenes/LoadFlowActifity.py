@@ -11,9 +11,9 @@ from ui.LoadflowHistiryDialogUI import LoadflowHistoryDialogUI
 from ui.GraphicalUI import GraphicalVisualization
 
 from ui.UIStyle import (
-    PLTN_SYSTEM_TITLE_STYLESHEET, FINDPATH_BUTTON_STYLESHEET
+    PLTN_SYSTEM_TITLE_STYLESHEET, FINDPATH_BUTTON_STYLESHEET,
+    CASES_COMBO_BOX_STYLESHEET
 )
-
 
 class LoadflowActifityScreenScene(QWidget):
     backcenario = pyqtSignal()
@@ -51,6 +51,7 @@ class LoadflowActifityScreenScene(QWidget):
 
         self.cases_combo_box = QComboBox()
         self.cases_combo_box.addItems(self.__caseses)
+        self.cases_combo_box.setStyleSheet(CASES_COMBO_BOX_STYLESHEET)
         self.cases_combo_box.currentTextChanged.connect(self.on_update_cases)
 
         self.run_loadflow_btn = QPushButton("Run Load Flow")
@@ -129,6 +130,20 @@ class LoadflowActifityScreenScene(QWidget):
         layout.addStretch(1)
         return tab, layout
 
+    def clear_layout(self, layout):
+        if layout is None:
+            return
+
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            else:
+                sub_layout = item.layout()
+                if sub_layout is not None:
+                    self.clearLayout(sub_layout)
+
     def set_visualization(self):
         # bus voltage
         viz_tab_bus_volatage = GraphicalVisualization()
@@ -138,6 +153,13 @@ class LoadflowActifityScreenScene(QWidget):
         )
         viz_tab_bus_volatage.plot_bar(
             x_label="Bus Name", y_label="Voltage (kV)")
+        self.clear_layout(self.tab_bus_volatage_layout)
+        title = QLabel("Bus Voltage")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet(PLTN_SYSTEM_TITLE_STYLESHEET)
+        self.tab_bus_volatage_layout.addWidget(title)
+        self.tab_bus_volatage_widget.setLayout(self.tab_bus_volatage_layout)
+        self.tab_bus_volatage_layout.addStretch(1)
         self.tab_bus_volatage_layout.addWidget(viz_tab_bus_volatage)
 
         # bus phasevoltage
@@ -147,7 +169,15 @@ class LoadflowActifityScreenScene(QWidget):
             y_values=self.data_tobe_showed["busphasevoltage"]
         )
         viz_tab_bus_phasevolatage.plot_bar(
-            x_label="Bus Name", y_label="Phase Voltage")
+            x_label="Bus Name", y_label="Phase Voltage (Hz)")
+        self.clear_layout(self.tab_bus_phasevolatage_layout)
+        title = QLabel("Bus Phasevoltage")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet(PLTN_SYSTEM_TITLE_STYLESHEET)
+        self.tab_bus_phasevolatage_layout.addWidget(title)
+        self.tab_bus_phasevolatage_widget.setLayout(
+            self.tab_bus_phasevolatage_layout)
+        self.tab_bus_phasevolatage_layout.addStretch(1)
         self.tab_bus_phasevolatage_layout.addWidget(viz_tab_bus_phasevolatage)
 
         # bus generatoractivepower
@@ -157,7 +187,14 @@ class LoadflowActifityScreenScene(QWidget):
             y_values=self.data_tobe_showed["generatoractivepower"]
         )
         viz_tab_gen_activepow.plot_bar(
-            x_label="Geneator Name", y_label="Active Power (MW)")
+            x_label="Geneator Name", y_label="Active Power (P)")
+        self.clear_layout(self.tab_gen_activepow_layout)
+        title = QLabel("Generator Active Power")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet(PLTN_SYSTEM_TITLE_STYLESHEET)
+        self.tab_gen_activepow_layout.addWidget(title)
+        self.tab_gen_activepow_widget.setLayout(self.tab_gen_activepow_layout)
+        self.tab_gen_activepow_layout.addStretch(1)
         self.tab_gen_activepow_layout.addWidget(viz_tab_gen_activepow)
 
         # generatorreactivepower
@@ -167,7 +204,15 @@ class LoadflowActifityScreenScene(QWidget):
             y_values=self.data_tobe_showed["generatorreactivepower"]
         )
         viz_tab_gen_reactivepow.plot_bar(
-            x_label="Geneator Name", y_label="Reactive Power (MW)")
+            x_label="Geneator Name", y_label="Reactive Power (Q)")
+        self.clear_layout(self.tab_gen_reactivepow_layout)
+        title = QLabel("Generator Reactive Power")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet(PLTN_SYSTEM_TITLE_STYLESHEET)
+        self.tab_gen_reactivepow_layout.addWidget(title)
+        self.tab_gen_reactivepow_widget.setLayout(
+            self.tab_gen_reactivepow_layout)
+        self.tab_gen_reactivepow_layout.addStretch(1)
         self.tab_gen_reactivepow_layout.addWidget(viz_tab_gen_reactivepow)
 
     def deactivate_result_tabs(self):
@@ -210,9 +255,6 @@ class LoadflowActifityScreenScene(QWidget):
             case_name=case
         )
         self.progress_dialog.show()
-
-    def create_data_show(self, tab_layout, data_label, data_content):
-        pass
 
     def clicked_history_handler(self):
         self.loadhistory = LoadflowHistoryDialogUI()

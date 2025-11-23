@@ -34,7 +34,12 @@ def connectandsetup(digsilent_path, proj_name):
         return False, f"Error happened :{str(e)}", ""
 
 
-def setup_load_showeddata(data_dictionary, output_dir="../data"):
+def setup_load_showeddata(
+    data_dictionary,
+    project_name = None,
+    case_name = None,
+    output_dir="../data"
+):
     data_voltage = []
     data_bus_phase_voltage = []
     label_bus = []
@@ -71,7 +76,11 @@ def setup_load_showeddata(data_dictionary, output_dir="../data"):
 
     # Buat nama file dinamis berdasarkan waktu
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"loadflow-{timestamp}.json"
+    
+    if project_name is not None or case_name is not None:
+        filename = f"loadflow-{project_name}-{case_name}-{timestamp}.json"
+    else:
+        filename = f"loadflow-{timestamp}.json"
     filepath = os.path.join(output_dir, filename)
 
     # Simpan ke JSON
@@ -225,7 +234,12 @@ def running_loadflow(
             })
 
         print(f"[DONE]: Collecting all loadflow data...")
-        return True, "Success running loadflow and collect all the data", setup_load_showeddata(insert_to, output_dir)
+        return True, "Success running loadflow and collect all the data", setup_load_showeddata(
+            project_name=proj_name,
+            case_name=case_name,
+            data_dictionary=insert_to,
+            output_dir=output_dir,
+        )
 
     except Exception as e:
         return False, f"[DONE]: Error happened: {str(e)}", ""

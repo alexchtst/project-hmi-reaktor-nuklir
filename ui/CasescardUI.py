@@ -1,10 +1,9 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QCheckBox
+    QLabel
 )
-from PyQt5.QtCore import pyqtSignal
 from ui.UIStyle import (
-    NAV_BUTTON_STYLESHEET, CARD_CONTAINER_STYLESHEET, CARD_TITLE_STYLESHEET, CARD_CONTENT_STYLESHEET
+    CARD_CONTAINER_STYLESHEET, CARD_TITLE_STYLESHEET
 )
 
 class CaseCardUI(QWidget):
@@ -24,12 +23,7 @@ class CaseCardUI(QWidget):
         self.card_title = QLabel(self.titlecontent)
         self.card_title.setStyleSheet(CARD_TITLE_STYLESHEET)
 
-        self.card_brief_content = QLabel("Informasi Jumlah Bus, Line, dan Generator")
-        self.card_brief_content.setStyleSheet(CARD_CONTENT_STYLESHEET)
-        self.card_brief_content.setWordWrap(True)
-
         self.card_layout.addWidget(self.card_title)
-        self.card_layout.addWidget(self.card_brief_content)
         self.card_widget.setLayout(self.card_layout)
 
         card_center_layout = QHBoxLayout()

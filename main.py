@@ -54,12 +54,11 @@ class MainApp(QStackedWidget):
         self.pltn.digsilentpathsignal.connect(self.on_listen_digsilent_path)
         self.pltn.casessignal.connect(self.on_pltn_connect_signal)
 
-        self.resize(1020, 680)
+        self.setMinimumSize(1020, 680)
         self.setCurrentIndex(0)
     
     def on_pltn_connect_signal(self, value):
         self.cases = value
-        print("value setted up as", value)
     
     def on_listen_pltn_system(self, value):
         self.pltnssytemprojetcname = value
@@ -68,12 +67,9 @@ class MainApp(QStackedWidget):
         self.digsilent_path = value
 
     def show_howto(self):
-        self.resize(1020, 680)
         self.setCurrentIndex(1)
 
     def show_pltn(self):
-        self.setMinimumHeight(680)
-        self.setMinimumWidth(1020)
         self.setCurrentIndex(2)
         
     def show_scenario(self):
@@ -82,8 +78,6 @@ class MainApp(QStackedWidget):
         self.scenario.proj_name = self.pltnssytemprojetcname
     
     def show_loadflowactifity(self):
-        self.setMinimumHeight(680)
-        self.setMinimumWidth(1020)
         self.setCurrentIndex(4)
         
         self.loadflow.ds_pf_path_signal.emit(self.digsilent_path)
@@ -91,8 +85,6 @@ class MainApp(QStackedWidget):
         self.loadflow.caseses_signal.emit(self.cases)
     
     def show_dynamicctifity(self):
-        self.setMinimumHeight(680)
-        self.setMinimumWidth(1020)
         self.setCurrentIndex(5)
         
         self.dynamic.ds_pf_path_signal.emit(self.digsilent_path)
