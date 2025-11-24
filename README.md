@@ -1,6 +1,12 @@
 # **PROJECT PLTN HILIRISET NUKLIR** HMI-REAKTOR NUKLIR `[DIGSILENT POWER FACTORY INTEGRATION]`
 
 
+## Digsilent Power Factory Library 
+[in progress]
+
+## Digsilent Power Factory GUI `[Graphical User Interface]`
+Create PyQt GUI to make a simple overview as HMI (Human Machine Intareface) in PLTN .pfd file that created with `Naufal Anwar`. This HMI is used to do automatication of pfd file in PLTN Project.
+
 ## Subprocess Template Communication
 
 [flag] [status] [type] [message] [data] ... [additional-info]

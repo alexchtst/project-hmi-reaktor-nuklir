@@ -2,7 +2,8 @@
 temp
 __pycache__
 .env
-data/*.csv
-data/*.json
 .venv
 play-ground
+build
+dist
+main.spec
