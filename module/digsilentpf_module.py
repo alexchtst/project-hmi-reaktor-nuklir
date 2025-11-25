@@ -310,7 +310,7 @@ def running_loadflow(
 def run_dynamic_simulation(
     digsilent_path,
     proj_name,
-    case_name="Study Case",
+    case_name,
     start_time_simulation=0,
     stop_time_simulation=100,
     step_size=0.01,
