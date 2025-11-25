@@ -13,7 +13,7 @@ class MainApp(QStackedWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("HMI Reaktor Nuklir")
-        self.setWindowIcon(QIcon(r"C:\Users\Alex\NgodingDulu\project-hmi-nuklir-new\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
         
         # variables and options
         self.pltnssytemprojetcname = None

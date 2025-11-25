@@ -198,7 +198,7 @@ class RunDynamicConfigUI(QDialog):
 
         self.setWindowTitle("Run Dynamic Simulation")
         self.setWindowIcon(
-            QIcon(r"C:\Users\Alex\NgodingDulu\project-hmi-nuklir-new\asset\logo-ugm.jpg"))
+            QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
         self.setFixedWidth(1000)
         self.setFixedHeight(680)
 

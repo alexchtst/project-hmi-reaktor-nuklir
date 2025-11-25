@@ -15,7 +15,7 @@ class DynamicHistoryDialogUI(QDialog):
         super().__init__()
         
         self.setWindowTitle("Dynamic Simulation History")
-        self.setWindowIcon(QIcon(r"C:\Users\Alex\NgodingDulu\project-hmi-nuklir-new\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
         self.setFixedWidth(800)
         self.setFixedHeight(500)
         

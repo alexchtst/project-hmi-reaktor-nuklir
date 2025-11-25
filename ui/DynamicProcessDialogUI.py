@@ -24,7 +24,7 @@ class DynamicProcessDialogUI(QDialog):
         super().__init__()
         
         self.setWindowTitle("Dynamic Run")
-        self.setWindowIcon(QIcon(r"C:\Users\Alex\NgodingDulu\project-hmi-nuklir-new\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
         self.setFixedWidth(480)
         self.setFixedHeight(120)
         
