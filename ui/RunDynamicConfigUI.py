@@ -249,7 +249,7 @@ class RunDynamicConfigUI(QDialog):
 
         # Start Time
         self.start_time_spin = QDoubleSpinBox()
-        self.start_time_spin.setRange(0, 1000)
+        self.start_time_spin.setRange(-1000, 1000)
         self.start_time_spin.setValue(0.0)
         self.start_time_spin.setSuffix(" s")
         self.start_time_spin.setDecimals(3)
@@ -257,7 +257,7 @@ class RunDynamicConfigUI(QDialog):
 
         # Stop Time
         self.stop_time_spin = QDoubleSpinBox()
-        self.stop_time_spin.setRange(0, 1000)
+        self.stop_time_spin.setRange(-100, 1000)
         self.stop_time_spin.setValue(10.0)
         self.stop_time_spin.setSuffix(" s")
         self.stop_time_spin.setDecimals(3)
