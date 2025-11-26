@@ -26,7 +26,7 @@ class CoverScreenScene(QWidget):
         self.background_label = QLabel(self)
         
         # [TODO] benerin ini lex
-        pixmap = QPixmap(r"C:\Users\Alex\NgodingDulu\hmi-reactor-nuklir\asset\Backgroundv1.jpg")
+        pixmap = QPixmap(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\Backgroundv1.jpg")
         
         self.background_label.setPixmap(pixmap)
         self.background_label.setScaledContents(True)

@@ -21,7 +21,7 @@ class DynamicHistoryDialogUI(QDialog):
         
         self.setWindowModality(Qt.ApplicationModal)
         
-        self.data_folder = r"C:\Users\Alex\NgodingDulu\hmi-reactor-nuklir\data"
+        self.data_folder = r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\data"
         
         self.setup_ui()
         

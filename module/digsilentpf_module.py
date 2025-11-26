@@ -312,7 +312,7 @@ def run_dynamic_simulation(
     proj_name,
     case_name,
     # default for testing set into -10 s
-    start_initial_time= -10000, # as the start initial condition (start calcultion ds pf) in ms
+    start_calc= -10000, # as the start initial condition (start calcultion ds pf) in ms
     start_time_simulation=0, # as the start capture / record data
     stop_time_simulation=100, # as the stop capture / record data
     step_size=0.01,
@@ -379,8 +379,8 @@ def run_dynamic_simulation(
         comInc.dtgrd = 30 # Integration time step
         comInc.dtout = step_size
         
-        if start_initial_time is not None:
-            comInc.tstart = start_initial_time
+        if start_calc is not None:
+            comInc.tstart = start_calc
         
         
         comInc.start = start_time_simulation

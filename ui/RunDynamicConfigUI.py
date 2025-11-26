@@ -206,7 +206,7 @@ class RunDynamicConfigUI(QDialog):
 
         self.setWindowModality(Qt.ApplicationModal)
 
-        self.data_folder = r"C:\Users\Alex\NgodingDulu\hmi-reactor-nuklir\data"
+        self.data_folder = r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\data"
 
         self.setup_ui()
 
@@ -230,6 +230,13 @@ class RunDynamicConfigUI(QDialog):
         case_label = QLabel(self.__case_name if self.__case_name else "N/A")
         case_label.setStyleSheet("color: #2c3e50; font-weight: bold;")
         info_layout.addRow("Study Case:", case_label)
+
+        self.start_calc_time = QDoubleSpinBox()
+        self.start_calc_time.setRange(-1000000, 10000)
+        self.start_calc_time.setValue(-100.0)
+        self.start_calc_time.setSuffix(" ms")
+        self.start_calc_time.setDecimals(3)
+        info_layout.addRow("Start Calculation Time:", self.start_calc_time)
 
         # Show event count for selected case
         event_count = 0
@@ -495,6 +502,7 @@ class RunDynamicConfigUI(QDialog):
         start_time = self.start_time_spin.value()
         stop_time = self.stop_time_spin.value()
         time_step = self.time_step_spin.value()
+        start_calc = self.start_calc_time.value()
 
         # Validasi
         if stop_time <= start_time:
@@ -506,11 +514,13 @@ class RunDynamicConfigUI(QDialog):
             'digsilent_path': self.__df_path,
             'proj_name': self.__proj_name,
             'case_name': self.__case_name,
+            'start_time_calc': start_calc,
             'start_time_simulation': start_time,
             'stop_time_simulation': stop_time,
             'step_size': time_step,
             'events_config': self.dynamic_config
         }
+        # print(sim_config)
         self.processdialog = DynamicProcessDialogUI(
             ds_pf_pathfle=self.__df_path,
             proj_name=self.__proj_name,

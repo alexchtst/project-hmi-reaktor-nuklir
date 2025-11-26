@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("--start_time", type=float, required=True)
     parser.add_argument("--stop_time", type=float, required=True)
     parser.add_argument("--step_size", type=float, required=True)
+    parser.add_argument("--start_calc", type=float, required=False, default=None)
     parser.add_argument("--events_config", required=False, default=None)
     parser.add_argument("--output_dir", required=False, default="../data")
     
@@ -34,6 +35,7 @@ if __name__ == "__main__":
         start_time_simulation=args.start_time,
         stop_time_simulation=args.stop_time,
         step_size=args.step_size,
+        start_calc=args.start_calc,
         events_config=events_config,
         output_dir=os.path.join(os.getcwd(), "data")
     )

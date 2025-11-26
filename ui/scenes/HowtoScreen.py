@@ -112,7 +112,7 @@ class HowToScreenScene(QWidget):
     def setup_background(self):
         """Setup background image"""
         self.background_label = QLabel(self)
-        pixmap = QPixmap(r"C:\Users\Alex\NgodingDulu\hmi-reactor-nuklir\asset\Backgroundv2.jpg")
+        pixmap = QPixmap(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\Backgroundv2.jpg")
         
         self.background_label.setPixmap(pixmap)
         self.background_label.setScaledContents(True)

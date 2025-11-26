@@ -160,6 +160,7 @@ class DigsilentWorker(QObject):
             proj_name = sim_config.get('proj_name')
             case_name = sim_config.get('case_name')
             start_time = sim_config.get('start_time_simulation')
+            start_calc = sim_config.get('start_time_calc', None) # in ms
             stop_time = sim_config.get('stop_time_simulation')
             step_size = sim_config.get('step_size')
             events_config = sim_config.get('events_config', {})
@@ -196,6 +197,7 @@ class DigsilentWorker(QObject):
                     "--start_time", str(start_time),
                     "--stop_time", str(stop_time),
                     "--step_size", str(step_size),
+                    "--start_calc", str(start_calc),
                     "--events_config", events_encoded,
                     "--output_dir", "../data"
                 ],
