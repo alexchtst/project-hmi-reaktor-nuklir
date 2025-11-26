@@ -311,8 +311,10 @@ def run_dynamic_simulation(
     digsilent_path,
     proj_name,
     case_name,
-    start_time_simulation=0,
-    stop_time_simulation=100,
+    # default for testing set into -10 s
+    start_initial_time= -10000, # as the start initial condition (start calcultion ds pf) in ms
+    start_time_simulation=0, # as the start capture / record data
+    stop_time_simulation=100, # as the stop capture / record data
     step_size=0.01,
     events_config=None,
     properties_data_name={
@@ -376,6 +378,10 @@ def run_dynamic_simulation(
         comInc.iopt_adapt = 0
         comInc.dtgrd = 30 # Integration time step
         comInc.dtout = step_size
+        
+        if start_initial_time is not None:
+            comInc.tstart = start_initial_time
+        
         
         comInc.start = start_time_simulation
         comSim.tstop = stop_time_simulation
