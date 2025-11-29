@@ -2,7 +2,25 @@
 
 
 ## Digsilent Power Factory Library 
-[in progress]
+Create Ready to Use Library to connect `digsilent powerfactory` software untill now **`nov 2025`**. This library is use for connection, check the project, check the study case, running loadflow, and running dynamic simulation with costumizeable event such as `switch-event` or `short-circuit-event`. The documentation is provided in `library/example.ipynb`.
+
+This library will soon published in `pypi` as the open library python that can be access with this such as class
+```python
+from digsilent_pf_lib import DigsilentPowerFactoryLibrary
+
+dspf = DigsilentPowerFactoryLibrary(
+    digsilent_path=r"C:\Program Files\DIgSILENT\PowerFactory 2024\Python\3.10",
+    proj_name='39 Bus New England System',
+    case_name="1. Power Flow"
+)
+
+# SUCCESS RETURN
+
+status_conn_project, message_conn_project = dspf.connect_digsilent_pf_project(connect_to_project='39 Bus New England System')
+
+print("status connection project :", status_conn_project)
+print("message connection project :", message_conn_project)
+```
 
 ## Digsilent Power Factory GUI `[Graphical User Interface]`
 Create PyQt GUI to make a simple overview as HMI (Human Machine Intareface) in PLTN .pfd file that created with `Naufal Anwar`. This HMI is used to do automatication of pfd file in PLTN Project.

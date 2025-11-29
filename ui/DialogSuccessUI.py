@@ -1,2 +1,0 @@
-def dialogsuccess():
-    return "dialogsuccess"
