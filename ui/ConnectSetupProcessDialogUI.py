@@ -7,6 +7,8 @@ from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtCore import Qt
 from ui.ProgressBarUI import ProgressLoaderBar
 from module.digsilentpf_worker import DigsilentWorker
+from asset.assetloader import LOGO
+
 
 class ConnectSetupProcessDialogUI(QDialog):
     finished = pyqtSignal()
@@ -23,7 +25,7 @@ class ConnectSetupProcessDialogUI(QDialog):
         super().__init__()
         
         self.setWindowTitle(titile)
-        self.setWindowIcon(QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(fr"{LOGO}"))
         self.setFixedWidth(480)
         self.setFixedHeight(120)
         

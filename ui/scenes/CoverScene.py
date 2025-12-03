@@ -3,6 +3,7 @@ from PyQt5.QtCore import QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve, Q
 from PyQt5.QtGui import QPixmap
 
 from ui.UIStyle import COVER_TITLE_STYLESHEET, COVER_SUBTITLE_STYLESHEET
+from asset.assetloader import BACKGROUNDV1
 
 SUBTITLE = """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
@@ -26,7 +27,7 @@ class CoverScreenScene(QWidget):
         self.background_label = QLabel(self)
         
         # [TODO] benerin ini lex
-        pixmap = QPixmap(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\Backgroundv1.jpg")
+        pixmap = QPixmap(fr"{BACKGROUNDV1}")
         
         self.background_label.setPixmap(pixmap)
         self.background_label.setScaledContents(True)

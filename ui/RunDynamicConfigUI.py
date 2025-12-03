@@ -9,6 +9,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt
 from ui.UIStyle import FINDPATH_BUTTON_STYLESHEET
 from ui.DynamicProcessDialogUI import DynamicProcessDialogUI
+from asset.assetloader import LOGO
+
 
 class EventConfigDialog(QDialog):
     """Dialog untuk konfigurasi event (fault atau switch)"""
@@ -197,8 +199,7 @@ class RunDynamicConfigUI(QDialog):
         self.__event_cases = event_cases if event_cases else {}
 
         self.setWindowTitle("Run Dynamic Simulation")
-        self.setWindowIcon(
-            QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(fr"{LOGO}"))
         self.setFixedWidth(1000)
         self.setFixedHeight(680)
 

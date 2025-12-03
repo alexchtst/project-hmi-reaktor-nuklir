@@ -8,6 +8,7 @@ from PyQt5.QtCore import pyqtSignal, Qt
 import os
 import json
 from datetime import datetime
+from asset.assetloader import LOGO
 
 class LoadflowHistoryDialogUI(QDialog):
     datareading = pyqtSignal(dict)
@@ -16,7 +17,7 @@ class LoadflowHistoryDialogUI(QDialog):
         super().__init__()
         
         self.setWindowTitle("Load Flow History")
-        self.setWindowIcon(QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(fr"{LOGO}"))
         self.setFixedWidth(800)
         self.setFixedHeight(500)
         

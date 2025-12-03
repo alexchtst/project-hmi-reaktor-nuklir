@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QPixmap
+from asset.assetloader import BACKGROUNDV2
 
 from ui.HowToUseSlideUI import HowToUseSlide
 from ui.UIStyle import (
@@ -112,7 +113,7 @@ class HowToScreenScene(QWidget):
     def setup_background(self):
         """Setup background image"""
         self.background_label = QLabel(self)
-        pixmap = QPixmap(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\Backgroundv2.jpg")
+        pixmap = QPixmap(fr"{BACKGROUNDV2}")
         
         self.background_label.setPixmap(pixmap)
         self.background_label.setScaledContents(True)
