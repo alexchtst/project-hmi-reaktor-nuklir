@@ -6,10 +6,8 @@ from ui.UIStyle import COVER_TITLE_STYLESHEET, COVER_SUBTITLE_STYLESHEET
 from asset.assetloader import BACKGROUNDV1
 
 SUBTITLE = """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-Phasellus at nulla efficitur, porta leo ac, porta ante. 
-Donec tincidunt, dui a luctus eleifend, ante mauris varius lectus, eu mattis lectus lacus vitae magna. 
-Nullam vitae urna sollicitudin, vulputate neque consequat, dignissim dolor
+Simulasi Human Machine Interface. 
+PLTN (Pembangkit Listrik Tenaga Nuklir). 
 """
 
 class CoverScreenScene(QWidget):
