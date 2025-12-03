@@ -10,6 +10,7 @@ from PyQt5.QtCore import pyqtSignal, Qt
 from ui.UIStyle import FINDPATH_BUTTON_STYLESHEET
 from ui.DynamicProcessDialogUI import DynamicProcessDialogUI
 from asset.assetloader import LOGO
+from utils import resource_path
 
 
 class EventConfigDialog(QDialog):
@@ -207,7 +208,7 @@ class RunDynamicConfigUI(QDialog):
 
         self.setWindowModality(Qt.ApplicationModal)
 
-        self.data_folder = r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\data"
+        self.data_folder = resource_path("data")
 
         self.setup_ui()
 

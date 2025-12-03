@@ -9,6 +9,7 @@ import os
 import json
 from datetime import datetime
 from asset.assetloader import LOGO
+from utils import resource_path
 
 class LoadflowHistoryDialogUI(QDialog):
     datareading = pyqtSignal(dict)
@@ -23,7 +24,7 @@ class LoadflowHistoryDialogUI(QDialog):
         
         self.setWindowModality(Qt.ApplicationModal)
         
-        self.data_folder = r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\data"
+        self.data_folder = resource_path("data")
         
         self.setup_ui()
         
