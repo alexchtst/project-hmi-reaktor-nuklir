@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+import subprocess
 
 def resource_path(relative_path):
     """
@@ -20,6 +21,15 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     
     return os.path.join(base_path, relative_path)
+
+def get_subprocess_startup_info():
+    """Get startup info untuk menyembunyikan console window di Windows"""
+    if sys.platform == 'win32':
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+        return startupinfo
+    return None
 
 
 def data_path(relative_path=""):

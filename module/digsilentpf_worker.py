@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from utils import resource_path
+from utils import resource_path, get_subprocess_startup_info
+import sys
 
 class DigsilentWorker(QObject):
     finished = pyqtSignal()
@@ -45,7 +46,9 @@ class DigsilentWorker(QObject):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                bufsize=1
+                bufsize=1,
+                startupinfo=get_subprocess_startup_info(),
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0  
             ) as prs:
                 for line in iter(prs.stdout.readline, ''):                    
                     if not line or self._running == False:
@@ -118,7 +121,9 @@ class DigsilentWorker(QObject):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                bufsize=1
+                bufsize=1,
+                startupinfo=get_subprocess_startup_info(),
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0  
             ) as prs:
 
                 for line in iter(prs.stdout.readline, ''):
@@ -205,7 +210,9 @@ class DigsilentWorker(QObject):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                bufsize=1
+                bufsize=1,
+                startupinfo=get_subprocess_startup_info(),
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0  
             ) as prs:
                 for line in iter(prs.stdout.readline, ''):
                     print(line.strip(), flush=True)

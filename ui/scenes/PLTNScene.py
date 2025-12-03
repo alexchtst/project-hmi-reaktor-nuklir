@@ -20,19 +20,15 @@ SYSTEM_PROVIDED_DADATA = {
     "39 Bus New England System": {
         "title": "39 Bus New England System Modified with SMR",
         "desccontent": [
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-            "In porttitor orci eu dapibus elementum. Sed quis magna "
-            "dignissim, auctor sapien in, scelerisque tortor."
-            "dignissim, auctor sapien in, scelerisque tortor."
+            "Simulasi Sistem PLTN (Bangka Belitung)"
         ],
         "pfd_path_file": ""
     },
     "Nine-bus System": {
         "title": "Nine-bus System",
         "desccontent": [
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-            "In porttitor orci eu dapibus elementum. Sed quis magna "
-            "dignissim, auctor sapien in, scelerisque tortor."
+            "(belum tersedia)"
+            "Sedang Dalam Pengerjaan"
         ],
         "pfd_path_file": ""
     },
