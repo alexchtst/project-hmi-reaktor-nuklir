@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+from utils import resource_path
 
 class DigsilentWorker(QObject):
     finished = pyqtSignal()
@@ -37,7 +38,7 @@ class DigsilentWorker(QObject):
             import subprocess
             with subprocess.Popen(
                 [
-                    "python", "worker_connectandsetup.py",
+                    "python", resource_path("worker_connectandsetup.py"),
                     "--digsilent_path", dgpath,
                     "--project_name", prjname,
                 ],
@@ -109,7 +110,7 @@ class DigsilentWorker(QObject):
             import subprocess
             with subprocess.Popen(
                 [
-                    "python", "worker_runloadflow.py",
+                    "python", resource_path("worker_runloadflow.py"),
                     "--digsilent_path", dgpath,
                     "--proj_name", prjname,
                     "--case_name", casename,
@@ -190,7 +191,7 @@ class DigsilentWorker(QObject):
             import subprocess
             with subprocess.Popen(
                 [
-                    "python", "worker_dynamic.py",
+                    "python", resource_path("worker_dynamic.py"),
                     "--digsilent_path", digsilent_path,
                     "--project_name", proj_name,
                     "--case_name", case_name,

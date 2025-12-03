@@ -9,13 +9,14 @@ from ui.scenes.ScenarioScene import ScenarioScreenScene
 from ui.scenes.LoadFlowActifity import LoadflowActifityScreenScene
 from ui.scenes.DynamicSimulation import DynamicActifityScreenScene
 from asset.assetloader import LOGO
+from utils import resource_path
 
 
 class MainApp(QStackedWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("HMI Reaktor Nuklir")
-        self.setWindowIcon(QIcon(fr"{LOGO}"))
+        self.setWindowIcon(QIcon(resource_path("asset/logo-ugm.jpg")))
 
         # variables and options
         self.pltnssytemprojetcname = None

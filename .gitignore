@@ -3,6 +3,7 @@ temp
 __pycache__
 .env
 .venv
+.installer-venv
 play-ground
 build
 dist
