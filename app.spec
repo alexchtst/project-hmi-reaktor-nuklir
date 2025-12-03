@@ -15,6 +15,7 @@ a = Analysis(
         ('worker_connectandsetup.py', '.'),  # Include worker files
         ('worker_dynamic.py', '.'),
         ('worker_runloadflow.py', '.'),
+        ('utils.py', '.'), 
     ],
     hiddenimports=[],
     hookspath=[],
