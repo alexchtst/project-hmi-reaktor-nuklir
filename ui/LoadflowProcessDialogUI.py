@@ -38,7 +38,7 @@ class LoadflowProcessDialogUI(QDialog):
         
         self.progress_info_layout = QVBoxLayout()
         
-        self.loginfo = QLabel("Memulai....")
+        self.loginfo = QLabel("Memproses....")
         self.progress_info_layout.addWidget(self.loginfo)
         
         self.progress_bar = ProgressLoaderBar(minimum=0, maximum=0, objectName="BlueProgressBar", textVisible=False)
@@ -84,6 +84,9 @@ class LoadflowProcessDialogUI(QDialog):
     def on_finished_event(self):
         self.finished.emit()
         self.progress_bar.hide()
+        
+        self.cancel_button.setText("OK")
+        
     
     def update_progress_log(self, value):
         self.loginfo.setText(value)
