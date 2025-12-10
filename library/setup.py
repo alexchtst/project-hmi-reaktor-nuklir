@@ -13,7 +13,7 @@ setup(
     url='https://github.com/alexchtst/project-hmi-reaktor-nuklir',
     author='sukan',
     author_email='acinatra@gmail.com',
-    license='Apache',  # atau sesuaikan lisensi Anda
+    license='MIT',  # atau sesuaikan lisensi Anda
 
     packages=find_packages(),
     python_requires='>=3.9',
@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
-        'License :: OSI Approved :: Apache License',
+        'License :: OSI Approved :: MIT License',
     ],
 
     keywords='PowerFactory digsilent loadflow dynamic-simulation',

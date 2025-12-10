@@ -5,7 +5,7 @@ Summary: Python Power Factory Connector Library
 Home-page: https://github.com/alexchtst/project-hmi-reaktor-nuklir
 Author: sukan
 Author-email: acinatra@gmail.com
-License: Apache
+License: MIT
 Project-URL: Source, https://github.com/alexchtst/project-hmi-reaktor-nuklir
 Project-URL: Issues, https://github.com/alexchtst/project-hmi-reaktor-nuklir/issues
 Keywords: PowerFactory digsilent loadflow dynamic-simulation
@@ -17,7 +17,7 @@ Classifier: Programming Language :: Python :: 3.9
 Classifier: Programming Language :: Python :: 3.10
 Classifier: Programming Language :: Python :: 3.11
 Classifier: Programming Language :: Python :: 3.12
-Classifier: License :: OSI Approved :: Apache License
+Classifier: License :: OSI Approved :: MIT License
 Requires-Python: >=3.9
 Description-Content-Type: text/plain
 License-File: LICENSE
