@@ -1,0 +1,6 @@
+LICENSE
+setup.py
+DigsilentPowerFactoryLibrary.egg-info/PKG-INFO
+DigsilentPowerFactoryLibrary.egg-info/SOURCES.txt
+DigsilentPowerFactoryLibrary.egg-info/dependency_links.txt
+DigsilentPowerFactoryLibrary.egg-info/top_level.txt
