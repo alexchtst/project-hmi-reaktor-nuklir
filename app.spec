@@ -46,7 +46,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='asset/logo-ugm.jpg'  # Tambahkan icon jika ada
+    icon='asset/logo-ugm.png'  # Tambahkan icon jika ada
 )
 
 coll = COLLECT(
