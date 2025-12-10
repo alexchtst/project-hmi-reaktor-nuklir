@@ -12,20 +12,20 @@ from ui.UIStyle import (
 )
 
 SYSTEM_PROVIDED = [
-    "39 Bus New England System",
+    "39 Bus New England System SMR",
     "Nine-bus System",
 ]
 
 SYSTEM_PROVIDED_DADATA = {
-    "39 Bus New England System": {
-        "title": "39 Bus New England System Modified with SMR",
+    "39 Bus New England System SMR": {
+        "title": "39 Bus New England System SMR",
         "desccontent": [
-            "Simulasi Sistem PLTN (Bangka Belitung)"
+            "Simulasi Sistem PLTN"
         ],
         "pfd_path_file": ""
     },
     "Nine-bus System": {
-        "title": "Nine-bus System",
+        "title": "Nine-bus System SMR",
         "desccontent": [
             "(belum tersedia)"
             "Sedang Dalam Pengerjaan"
@@ -55,7 +55,7 @@ class PLTNOptionScreenScene(QWidget):
         data = SYSTEM_PROVIDED_DADATA[default_key]
         
         self.validation_status = {
-            "39 Bus New England System": False,
+            "39 Bus New England System SMR": False,
             "Nine-bus System": False
         }
 

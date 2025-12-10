@@ -27,7 +27,7 @@ class MainApp(QStackedWidget):
 
         # new data sturcture
         self.user_data_dspf = {
-            "39 Bus New England System": {
+            "39 Bus New England System SMR": {
                 "dspf_path": None,
                 "cases": [],
                 "event_cases": None,
