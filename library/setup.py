@@ -1,21 +1,20 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
-    name='DigsilentPowerFactoryLibrary',
+    name='dspfl',
     version='0.0.1',
     description='Python Power Factory Connector Library',
-    long_description=(
-        'Library untuk menghubungkan Python dengan DIgSILENT PowerFactory, '
-        'mendeteksi project, study case, menjalankan loadflow, serta '
-        'melakukan simulasi dinamis.'
-    ),
-    long_description_content_type='text/plain',
+    long_description = long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/alexchtst/project-hmi-reaktor-nuklir',
-    author='sukan',
+    author='ach',
     author_email='acinatra@gmail.com',
-    license='MIT',  # atau sesuaikan lisensi Anda
+    license='MIT',
 
-    packages=find_packages(),
+    packages=["dspfl"],
     python_requires='>=3.9',
 
     classifiers=[
