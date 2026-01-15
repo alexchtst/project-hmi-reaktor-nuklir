@@ -12,27 +12,23 @@ from ui.UIStyle import (
 )
 
 SYSTEM_PROVIDED = [
-    "39 Bus New England System",
+    "39 Bus New England System SMR",
     "Nine-bus System",
 ]
 
 SYSTEM_PROVIDED_DADATA = {
-    "39 Bus New England System": {
-        "title": "39 Bus New England System Modified with SMR",
+    "39 Bus New England System SMR": {
+        "title": "39 Bus New England System SMR",
         "desccontent": [
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-            "In porttitor orci eu dapibus elementum. Sed quis magna "
-            "dignissim, auctor sapien in, scelerisque tortor."
-            "dignissim, auctor sapien in, scelerisque tortor."
+            "Simulasi Sistem PLTN"
         ],
         "pfd_path_file": ""
     },
     "Nine-bus System": {
-        "title": "Nine-bus System",
+        "title": "Nine-bus System SMR",
         "desccontent": [
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-            "In porttitor orci eu dapibus elementum. Sed quis magna "
-            "dignissim, auctor sapien in, scelerisque tortor."
+            "(belum tersedia)"
+            "Sedang Dalam Pengerjaan"
         ],
         "pfd_path_file": ""
     },
@@ -59,7 +55,7 @@ class PLTNOptionScreenScene(QWidget):
         data = SYSTEM_PROVIDED_DADATA[default_key]
         
         self.validation_status = {
-            "39 Bus New England System": False,
+            "39 Bus New England System SMR": False,
             "Nine-bus System": False
         }
 
@@ -92,7 +88,7 @@ class PLTNOptionScreenScene(QWidget):
         
         find_btn_layout = QHBoxLayout()
         find_btn_layout.addStretch()
-        self.find_path_btn = QPushButton("Konek Digsilent")
+        self.find_path_btn = QPushButton("Hubungkan Digsilent")
         self.find_path_btn.setStyleSheet(FINDPATH_BUTTON_STYLESHEET)
         find_btn_layout.addWidget(self.find_path_btn)
         self.find_path_btn.clicked.connect(self.select_digsilent_folder)

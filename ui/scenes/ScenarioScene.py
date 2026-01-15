@@ -34,9 +34,11 @@ class ScenarioScreenScene(QWidget):
         self.nextloadflowactifity.setMinimumSize(250, 150)
 
         loadflowdescription = QLabel(
-            "Etiam placerat velit dolor, id porta neque elementum et. "
-            "Proin mattis, lectus non blandit sodales, leo dui fringilla lorem."
+            "Proses Load Flow digunakan untuk menghitung aliran daya, tegangan bus, "
+            "arus saluran, serta rugi-rugi pada sistem tenaga. Analisis ini membantu "
+            "memastikan sistem beroperasi dalam kondisi stabil dan sesuai batas operasi."
         )
+
         loadflowdescription.setStyleSheet(CARD_CONTENT_STYLESHEET)
         loadflowdescription.setWordWrap(True)
         loadflowdescription.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -52,9 +54,11 @@ class ScenarioScreenScene(QWidget):
         self.nextdynamicctifity.setStyleSheet(SCENARIO_NAV_BUTTON_STYLESHEET)
 
         dynamicdescription = QLabel(
-            "Etiam placerat velit dolor, id porta neque elementum et. "
-            "Proin mattis, lectus non blandit sodales, leo dui fringilla lorem."
+            "Dynamic Simulation digunakan untuk menganalisis respon transien sistem tenaga "
+            "terhadap gangguan, seperti hubung singkat atau perubahan beban. Proses ini "
+            "memungkinkan evaluasi kestabilan dan performa dinamis sistem."
         )
+
         dynamicdescription.setStyleSheet(CARD_CONTENT_STYLESHEET)
         dynamicdescription.setWordWrap(True)
         dynamicdescription.setAlignment(Qt.AlignmentFlag.AlignCenter)

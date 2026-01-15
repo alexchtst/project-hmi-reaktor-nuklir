@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, QThread, Qt
 from ui.ProgressBarUI import ProgressLoaderBar
+from asset.assetloader import LOGO
 
 class DownloaderProcessDialogUI(QDialog):
     finished = pyqtSignal()
@@ -17,7 +18,7 @@ class DownloaderProcessDialogUI(QDialog):
         super().__init__()
 
         self.setWindowTitle(title)
-        self.setWindowIcon(QIcon(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
+        self.setWindowIcon(QIcon(fr"{LOGO}"))
         self.setFixedWidth(480)
         self.setFixedHeight(120)
 

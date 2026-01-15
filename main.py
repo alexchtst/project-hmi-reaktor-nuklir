@@ -8,14 +8,15 @@ from ui.scenes.PLTNScene import PLTNOptionScreenScene
 from ui.scenes.ScenarioScene import ScenarioScreenScene
 from ui.scenes.LoadFlowActifity import LoadflowActifityScreenScene
 from ui.scenes.DynamicSimulation import DynamicActifityScreenScene
+from asset.assetloader import LOGO
+from utils import resource_path
 
 
 class MainApp(QStackedWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("HMI Reaktor Nuklir")
-        self.setWindowIcon(QIcon(
-            r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\logo-ugm.jpg"))
+        self.setWindowTitle("GIAT -Grid Impact Assessment Tool")
+        self.setWindowIcon(QIcon(resource_path("asset/logo-ugm.png")))
 
         # variables and options
         self.pltnssytemprojetcname = None
@@ -26,7 +27,7 @@ class MainApp(QStackedWidget):
 
         # new data sturcture
         self.user_data_dspf = {
-            "39 Bus New England System": {
+            "39 Bus New England System SMR": {
                 "dspf_path": None,
                 "cases": [],
                 "event_cases": None,

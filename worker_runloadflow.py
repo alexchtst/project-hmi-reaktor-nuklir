@@ -1,6 +1,7 @@
 import argparse
 from module.digsilentpf_module import running_loadflow
 import os
+from data.pathloader import DATA
 
 def main():
     parser = argparse.ArgumentParser(description="Worker untuk menjalankan loadflow PowerFactory")
@@ -13,7 +14,7 @@ def main():
         digsilent_path=args.digsilent_path,
         proj_name=args.proj_name,
         case_name=args.case_name,
-        output_dir = os.path.join(os.getcwd(), "data")
+        output_dir = DATA
     )
     
     if success:

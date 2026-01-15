@@ -32,7 +32,7 @@ class PLTNCardUI(QWidget):
         self.card_brief_content.setWordWrap(True)
 
         card_layout.addWidget(self.card_title)
-        card_layout.addWidget(card_download_pfd)
+        # card_layout.addWidget(card_download_pfd)
         card_layout.addWidget(self.card_brief_content)
         card_widget.setLayout(card_layout)
 

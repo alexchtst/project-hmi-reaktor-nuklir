@@ -3,12 +3,11 @@ from PyQt5.QtCore import QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve, Q
 from PyQt5.QtGui import QPixmap
 
 from ui.UIStyle import COVER_TITLE_STYLESHEET, COVER_SUBTITLE_STYLESHEET
+from asset.assetloader import BACKGROUNDV1
 
 SUBTITLE = """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-Phasellus at nulla efficitur, porta leo ac, porta ante. 
-Donec tincidunt, dui a luctus eleifend, ante mauris varius lectus, eu mattis lectus lacus vitae magna. 
-Nullam vitae urna sollicitudin, vulputate neque consequat, dignissim dolor
+Perangkat lunak untuk melakukan analisis dampak integrasi SMR terhadap sistem jaringan tenaga listrik, 
+khususnya pada sistem kelistrikan Bangka dan Kalimantan Barat.
 """
 
 class CoverScreenScene(QWidget):
@@ -26,14 +25,14 @@ class CoverScreenScene(QWidget):
         self.background_label = QLabel(self)
         
         # [TODO] benerin ini lex
-        pixmap = QPixmap(r"C:\Users\MSI\code-base\project-hmi-reaktor-nuklir\project-hmi-reaktor-nuklir\asset\Backgroundv1.jpg")
+        pixmap = QPixmap(fr"{BACKGROUNDV1}")
         
         self.background_label.setPixmap(pixmap)
         self.background_label.setScaledContents(True)
         self.background_label.setAlignment(Qt.AlignCenter)
         
         # Title label
-        self.title_label = QLabel("Simulasi Integrasi PLTN")
+        self.title_label = QLabel("GIAT SMR V.1")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet(COVER_TITLE_STYLESHEET)
         self.title_label.setWordWrap(True)

@@ -4,6 +4,7 @@ import json
 import base64
 from module.digsilentpf_module import run_dynamic_simulation
 import os
+from data.pathloader import DATA
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -15,7 +16,7 @@ if __name__ == "__main__":
     parser.add_argument("--step_size", type=float, required=True)
     parser.add_argument("--start_calc", type=float, required=False, default=None)
     parser.add_argument("--events_config", required=False, default=None)
-    parser.add_argument("--output_dir", required=False, default="../data")
+    parser.add_argument("--output_dir", required=False, default=DATA)
     
     args = parser.parse_args()
 
@@ -37,7 +38,7 @@ if __name__ == "__main__":
         step_size=args.step_size,
         start_calc=args.start_calc,
         events_config=events_config,
-        output_dir=os.path.join(os.getcwd(), "data")
+        output_dir=DATA
     )
 
     if success:
