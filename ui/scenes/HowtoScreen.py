@@ -14,7 +14,7 @@ from ui.UIStyle import (
 
 slides_data = [
     {
-        "title": "Selamat Datang di Simulator PLTN",
+        "title": "Selamat Datang di Aplikasi GIAT",
         "description": "Aplikasi ini membantu Anda mensimulasikan integrasi PLTN dengan sistem kelistrikan. Mari kita pelajari cara menggunakannya.",
         "content": [],
         "image": ""

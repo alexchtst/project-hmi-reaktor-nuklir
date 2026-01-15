@@ -15,7 +15,7 @@ from utils import resource_path
 class MainApp(QStackedWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("HMI Reaktor Nuklir")
+        self.setWindowTitle("GIAT -Grid Impact Assessment Tool")
         self.setWindowIcon(QIcon(resource_path("asset/logo-ugm.png")))
 
         # variables and options

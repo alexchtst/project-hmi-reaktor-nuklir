@@ -88,7 +88,7 @@ class PLTNOptionScreenScene(QWidget):
         
         find_btn_layout = QHBoxLayout()
         find_btn_layout.addStretch()
-        self.find_path_btn = QPushButton("Konek Digsilent")
+        self.find_path_btn = QPushButton("Hubungkan Digsilent")
         self.find_path_btn.setStyleSheet(FINDPATH_BUTTON_STYLESHEET)
         find_btn_layout.addWidget(self.find_path_btn)
         self.find_path_btn.clicked.connect(self.select_digsilent_folder)

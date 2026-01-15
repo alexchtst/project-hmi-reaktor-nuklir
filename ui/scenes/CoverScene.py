@@ -6,8 +6,8 @@ from ui.UIStyle import COVER_TITLE_STYLESHEET, COVER_SUBTITLE_STYLESHEET
 from asset.assetloader import BACKGROUNDV1
 
 SUBTITLE = """
-Simulasi Human Machine Interface. 
-PLTN (Pembangkit Listrik Tenaga Nuklir). 
+Perangkat lunak untuk melakukan analisis dampak integrasi SMR terhadap sistem jaringan tenaga listrik, 
+khususnya pada sistem kelistrikan Bangka dan Kalimantan Barat.
 """
 
 class CoverScreenScene(QWidget):
@@ -32,7 +32,7 @@ class CoverScreenScene(QWidget):
         self.background_label.setAlignment(Qt.AlignCenter)
         
         # Title label
-        self.title_label = QLabel("Simulasi Integrasi PLTN")
+        self.title_label = QLabel("GIAT SMR V.1")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet(COVER_TITLE_STYLESHEET)
         self.title_label.setWordWrap(True)

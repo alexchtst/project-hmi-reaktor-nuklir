@@ -7,12 +7,12 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('asset', 'asset'),           # Include folder asset
-        ('data', 'data'),             # Include folder data
-        ('ui', 'ui'),                 # Include folder ui
-        ('library', 'library'),       # Include folder library
-        ('module', 'module'),         # Include folder module
-        ('worker_connectandsetup.py', '.'),  # Include worker files
+        ('asset', 'asset'),                     # Include folder asset
+        ('data', 'data'),                       # Include folder data
+        ('ui', 'ui'),                           # Include folder ui
+        ('library', 'library'),                 # Include folder library
+        ('module', 'module'),                   # Include folder module
+        ('worker_connectandsetup.py', '.'),     # Include worker files
         ('worker_dynamic.py', '.'),
         ('worker_runloadflow.py', '.'),
         ('utils.py', '.'), 
@@ -35,7 +35,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='AplikasiReaktorNuklir',
+    name='GIAT',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -57,5 +57,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='AplikasiReaktorNuklir'
+    name='GIAT'
 )
